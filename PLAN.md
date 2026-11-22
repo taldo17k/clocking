@@ -49,20 +49,23 @@ The site keeps this order and this method. Its core is a **digital `HH:MM` clock
 **Tasks**
 - Create the structure:
   ```
-  index.html
-  css/styles.css
-  js/main.js
-  js/time.js         # pure functions: pair(h), partOfDay(h), spoken(h, m)
-  js/clock.js        # digital HH:MM clock component
-  js/dial.js         # two-ring analog clock (SVG)
-  js/scene.js        # sky scene renderer
-  js/lessons.js      # lesson navigation
-  js/quiz.js         # practice mode
-  strings/en.js      # all UI text
-  assets/            # favicon, og-image
-  tests/time.test.js
+  site/                # the only folder published to GitHub Pages
+    index.html
+    css/styles.css
+    js/main.js
+    js/phases.js       # part-of-day hour ranges
+    js/time.js         # pure functions: pair(h), partOfDay(h), spoken(h, m)
+    js/clock.js        # digital HH:MM clock component
+    js/dial.js         # two-ring analog clock (SVG)
+    js/scene.js        # sky scene renderer
+    js/lessons.js      # lesson navigation
+    js/quiz.js         # practice mode
+    strings/en.js      # all UI text
+    assets/            # favicon, og-image
+  tests/time.test.js   # not published
   .github/workflows/pages.yml
   ```
+  The repo is public, but `PLAN.md` and `documents/` are not deployed to the live site.
 - Add a minimal placeholder page.
 - Configure the deploy workflow and enable Pages in the repo settings.
 

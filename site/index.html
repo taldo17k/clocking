@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clocking · Learn the 24-hour clock</title>
+  <meta name="description" content="A friendly, interactive way to learn how to read the 24-hour clock.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;800&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="./">
+        <img src="assets/favicon.svg" alt="" width="36" height="36">
+        <span data-i18n="siteName">Clocking</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1 class="hero-title"><span class="highlight-pink" data-i18n="heroTitle">How to read the 24-hour clock</span></h1>
+      <p class="hero-lead" data-i18n="heroLead">A day has 24 hours. Let's learn to read every one of them.</p>
+
+      <div class="stage" id="stage" data-phase="morning">
+        <div class="sky" aria-hidden="true">
+          <div class="stars"></div>
+          <div class="orb"></div>
+          <div class="ground"></div>
+        </div>
+        <p class="phase-label" aria-live="polite">
+          <span id="phase-name">Morning</span>
+        </p>
+
+        <div class="clock-card card">
+          <div class="digital" role="img" id="digital" aria-label="08:15">
+            <span class="slot" data-part="h1">0</span><span class="slot" data-part="h2">8</span>
+            <span class="colon">:</span>
+            <span class="slot" data-part="m1">1</span><span class="slot" data-part="m2">5</span>
+          </div>
+          <div class="digital-labels">
+            <span data-i18n="hoursLabel">hours (00–23)</span>
+            <span data-i18n="minutesLabel">minutes (00–59)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="phases" aria-labelledby="phases-title">
+      <h2 id="phases-title"><span class="highlight-green" data-i18n="phasesTitle">Parts of the day</span></h2>
+      <p class="muted" data-i18n="phasesHint">Tap a part of the day to see its sky.</p>
+      <ul class="phase-list" id="phase-list"></ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap muted">
+      <p data-i18n="footerCredit">Based on a hand-drawn lesson.</p>
+    </div>
+  </footer>
+</body>
+</html>

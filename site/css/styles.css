@@ -1,0 +1,422 @@
+/* ==========================================================================
+   Clocking: design system
+   All colors, sizes and spacing are tokens on :root.
+   ========================================================================== */
+
+:root {
+  /* Paper & ink (from the marker-on-paper original) */
+  --paper: #fdfaf3;
+  --paper-2: #f4eee0;
+  --card: #ffffff;
+  --ink: #2b2a33;
+  --ink-muted: #5d5a6b;
+  --line: #2b2a33;
+
+  /* Highlighters used on the original page */
+  --hl-pink: #f7b8c8;
+  --hl-green: #d9f57a;
+  --focus: #6a4c9c;
+
+  /* Typography */
+  --font-display: 'Fredoka', 'Nunito', system-ui, sans-serif;
+  --font-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fs-sm: 0.875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: clamp(1.75rem, 1.2rem + 2.6vw, 2.75rem);
+  --fs-clock: clamp(3rem, 2rem + 8vw, 5.5rem);
+
+  /* Spacing scale */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --gutter: 16px;
+  --max-w: 960px;
+
+  /* Shapes: a slightly wobbly, hand-drawn radius */
+  --radius: 18px 22px 16px 24px / 22px 16px 24px 18px;
+  --radius-sm: 10px 12px 9px 13px / 12px 9px 13px 10px;
+  --border-w: 2.5px;
+  --shadow: 4px 5px 0 0 rgba(43, 42, 51, 0.9);
+  --shadow-sm: 2px 3px 0 0 rgba(43, 42, 51, 0.9);
+
+  /* Motion */
+  --t-fast: 150ms;
+  --t-scene: 900ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark mode (OS setting) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #14152a;
+    --paper-2: #1b1d36;
+    --card: #222445;
+    --ink: #f1eee6;
+    --ink-muted: #b9b6c8;
+    --line: #f1eee6;
+    --hl-pink: #8c3d5a;
+    --hl-green: #4d6b12;
+    --focus: #d9b8ff;
+    --shadow: 4px 5px 0 0 rgba(0, 0, 0, 0.6);
+    --shadow-sm: 2px 3px 0 0 rgba(0, 0, 0, 0.6);
+  }
+}
+:root[data-theme='dark'] {
+  --paper: #14152a;
+  --paper-2: #1b1d36;
+  --card: #222445;
+  --ink: #f1eee6;
+  --ink-muted: #b9b6c8;
+  --line: #f1eee6;
+  --hl-pink: #8c3d5a;
+  --hl-green: #4d6b12;
+  --focus: #d9b8ff;
+  --shadow: 4px 5px 0 0 rgba(0, 0, 0, 0.6);
+  --shadow-sm: 2px 3px 0 0 rgba(0, 0, 0, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   Part-of-day palettes (taken from the drawings on the original page).
+   Any element with data-phase="…" gets these sky tokens.
+   -------------------------------------------------------------------------- */
+[data-phase] {
+  --sky-1: #a9def2; --sky-2: #e6f6fb;
+  --orb: #ffd23f; --orb-y: 30%; --orb-x: 72%;
+  --ground: #9fd0e0; --stars: 0; --moon: 0;
+}
+[data-phase='night'] {
+  --sky-1: #07081a; --sky-2: #22244a;
+  --orb: #f3ef8a; --orb-y: 18%; --orb-x: 22%;
+  --ground: #14152b; --stars: 1; --moon: 1;
+}
+[data-phase='sunrise'] {
+  --sky-1: #5b3c88; --sky-2: #f5a3b5;
+  --orb: #ffd23f; --orb-y: 64%; --orb-x: 18%;
+  --ground: #c4607f; --stars: 0.15; --moon: 0;
+}
+[data-phase='morning'] {
+  --sky-1: #8fd3ee; --sky-2: #e8f7fc;
+  --orb: #ffd23f; --orb-y: 38%; --orb-x: 24%;
+  --ground: #a7d9c0; --stars: 0; --moon: 0;
+}
+[data-phase='midday'] {
+  --sky-1: #2fa6d9; --sky-2: #a6e0f4;
+  --orb: #ffcc1a; --orb-y: 12%; --orb-x: 50%;
+  --ground: #86c99b; --stars: 0; --moon: 0;
+}
+[data-phase='afternoon'] {
+  --sky-1: #5cb8e0; --sky-2: #f6e2a8;
+  --orb: #ffb627; --orb-y: 32%; --orb-x: 76%;
+  --ground: #9cc48a; --stars: 0; --moon: 0;
+}
+[data-phase='sunset'] {
+  --sky-1: #4a2f7a; --sky-2: #ff8a4c;
+  --orb: #ffd23f; --orb-y: 64%; --orb-x: 82%;
+  --ground: #3a2a5e; --stars: 0.2; --moon: 0;
+}
+[data-phase='evening'] {
+  --sky-1: #15163a; --sky-2: #4b3f80;
+  --orb: #f3ef8a; --orb-y: 22%; --orb-x: 76%;
+  --ground: #1d1c3c; --stars: 0.7; --moon: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 var(--sp-3);
+}
+h2 { font-size: var(--fs-lg); }
+
+p { margin: 0 0 var(--sp-4); }
+
+a { color: inherit; }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--max-w);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.muted { color: var(--ink-muted); }
+
+/* Highlighter marks, like on the paper original */
+.highlight-pink,
+.highlight-green {
+  background-repeat: no-repeat;
+  background-size: 100% 0.55em;
+  background-position: 0 88%;
+  padding-inline: 0.1em;
+}
+.highlight-pink { background-image: linear-gradient(var(--hl-pink), var(--hl-pink)); }
+.highlight-green { background-image: linear-gradient(var(--hl-green), var(--hl-green)); }
+
+.card {
+  background: var(--card);
+  border: var(--border-w) solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* --------------------------------------------------------------------------
+   Header & footer
+   -------------------------------------------------------------------------- */
+.site-header { padding-block: var(--sp-4); }
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  text-decoration: none;
+}
+
+.site-footer {
+  margin-top: auto;
+  padding-block: var(--sp-6) var(--sp-5);
+  font-size: var(--fs-sm);
+}
+
+/* --------------------------------------------------------------------------
+   Hero + stage (sky scene with the digital clock)
+   -------------------------------------------------------------------------- */
+.hero { padding-block: var(--sp-4) var(--sp-6); }
+
+.hero-title { font-size: var(--fs-xl); }
+.hero-lead { color: var(--ink-muted); font-size: var(--fs-lg); max-width: 36ch; }
+
+.stage {
+  position: relative;
+  isolation: isolate;
+  border: var(--border-w) solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  padding: var(--sp-6) var(--sp-4) var(--sp-5);
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sp-4);
+}
+
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, var(--sky-1), var(--sky-2));
+  transition: background var(--t-scene) var(--ease);
+}
+
+.stars {
+  position: absolute;
+  inset: 0 0 30% 0;
+  opacity: var(--stars);
+  transition: opacity var(--t-scene) var(--ease);
+  background-image:
+    radial-gradient(2px 2px at 12% 22%, #fff9c4 50%, transparent 51%),
+    radial-gradient(2.5px 2.5px at 34% 12%, #fff9c4 50%, transparent 51%),
+    radial-gradient(2px 2px at 58% 30%, #fff9c4 50%, transparent 51%),
+    radial-gradient(3px 3px at 82% 16%, #fff9c4 50%, transparent 51%),
+    radial-gradient(2px 2px at 90% 44%, #fff9c4 50%, transparent 51%),
+    radial-gradient(2.5px 2.5px at 46% 52%, #fff9c4 50%, transparent 51%),
+    radial-gradient(2px 2px at 8% 56%, #fff9c4 50%, transparent 51%),
+    radial-gradient(2px 2px at 68% 8%, #fff9c4 50%, transparent 51%);
+}
+
+/* The sun (or the moon when --moon is 1) */
+.orb {
+  --size: clamp(56px, 12vw, 84px);
+  position: absolute;
+  width: var(--size);
+  height: var(--size);
+  left: calc(var(--orb-x) - var(--size) / 2);
+  top: var(--orb-y);
+  border-radius: 50%;
+  background: var(--orb);
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--orb) 35%, transparent),
+              0 0 40px 18px color-mix(in srgb, var(--orb) 45%, transparent);
+  transition: left var(--t-scene) var(--ease), top var(--t-scene) var(--ease),
+              background var(--t-scene) var(--ease), box-shadow var(--t-scene) var(--ease);
+}
+/* Crescent moon: cut the disc with a sky-colored circle */
+.orb::after {
+  content: '';
+  position: absolute;
+  inset: -2px -2px -2px 28%;
+  border-radius: 50%;
+  background: var(--sky-1);
+  opacity: var(--moon);
+  transition: opacity var(--t-scene) var(--ease), background var(--t-scene) var(--ease);
+}
+[data-phase='night'] .orb,
+[data-phase='evening'] .orb { box-shadow: 0 0 24px 4px color-mix(in srgb, var(--orb) 30%, transparent); }
+
+/* Rolling hills, like on the sunrise/sunset drawings */
+.ground {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: -40px;
+  height: 120px;
+  background:
+    radial-gradient(60% 100% at 20% 100%, var(--ground) 70%, transparent 71%),
+    radial-gradient(55% 90% at 75% 100%, var(--ground) 70%, transparent 71%),
+    linear-gradient(var(--ground), var(--ground)) bottom / 100% 72px no-repeat;
+  filter: brightness(0.95);
+  transition: background var(--t-scene) var(--ease);
+}
+
+.phase-label {
+  position: absolute;
+  top: var(--sp-4);
+  right: var(--sp-4);
+  margin: 0;
+  padding: var(--sp-1) var(--sp-4);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-lg);
+  background: var(--card);
+  color: var(--ink);
+  border: var(--border-w) solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.clock-card {
+  padding: var(--sp-4) var(--sp-5) var(--sp-3);
+  text-align: center;
+}
+
+/* Digital clock: each digit sits on a "blank", like _ _ : _ _ on the page */
+.digital {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.08em;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-clock);
+  line-height: 1;
+}
+.slot {
+  display: inline-block;
+  width: 0.72em;
+  text-align: center;
+  padding-bottom: 0.06em;
+  border-bottom: 4px solid var(--line);
+  border-radius: 0 0 2px 2px;
+}
+.colon { padding-inline: 0.06em; padding-bottom: 0.12em; }
+
+.digital-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-5);
+  margin-top: var(--sp-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Parts-of-day chips
+   -------------------------------------------------------------------------- */
+.phases { padding-bottom: var(--sp-6); }
+
+.phase-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--sp-3);
+}
+
+.phase-chip {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: 'swatch name' 'swatch hours';
+  align-items: center;
+  column-gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  font: inherit;
+  text-align: start;
+  color: var(--ink);
+  background: var(--card);
+  border: var(--border-w) solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+.phase-chip:hover { transform: translate(-1px, -1px); box-shadow: 3px 4px 0 0 var(--line); }
+.phase-chip:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 0 var(--line); }
+.phase-chip[aria-pressed='true'] { background: var(--hl-green); }
+
+.swatch {
+  grid-area: swatch;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background:
+    radial-gradient(circle at 65% 35%, var(--orb) 0 22%, transparent 23%),
+    linear-gradient(180deg, var(--sky-1), var(--sky-2));
+}
+.chip-name { grid-area: name; font-family: var(--font-display); font-weight: 600; line-height: 1.2; }
+.chip-hours { grid-area: hours; font-size: var(--fs-sm); color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+  .stage { min-height: 420px; padding-bottom: var(--sp-6); }
+  .hero { padding-block: var(--sp-5) var(--sp-7); }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
