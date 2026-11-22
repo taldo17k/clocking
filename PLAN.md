@@ -15,7 +15,7 @@ Turn the hand-made teaching page (`documents/24hr-clock-example.jpeg`, transcrib
 3. **Clock structure:** `HH:MM` means hours (00–23) : minutes (00–59).
 4. **How to say it:** `08:15` → "eight fifteen in the morning", and `22:39` → "ten thirty-nine at night".
 
-The site keeps this order and this method. Its core is a **digital `HH:MM` clock**, the **pairs table**, and a **sky scene** that changes with the hour. Underneath sits a **two-ring analog clock**: an inner ring 1–12 and an outer ring 13–24 around it. It shows why the pairs are "the same": both hours in a pair sit at the same spot on the dial.
+The site keeps this order and this method. Its core is a **digital `HH:MM` clock**, the **pairs table**, and a **sky scene** that changes with the hour. Underneath sits a **two-ring analog clock**: an inner ring 00–11 and an outer ring 12–23 around it, matching the two columns of the pairs table. It shows why the pairs are "the same": both hours in a pair sit at the same spot on the dial.
 
 ## Guiding Decisions
 
@@ -38,7 +38,7 @@ The site keeps this order and this method. Its core is a **digital `HH:MM` clock
 - The author has confirmed these choices: "Sunrise" (06) and "Sunset" (18), Midday 12–14 and Afternoon 15–17, AM/PM as a secondary hint, and the two-ring analog clock.
 
 **Success criteria**
-- [ ] The reference image is committed and viewable in the repo.
+- [x] The reference image is committed and viewable in the repo.
 - [x] `documents/CONTENT.md` lists every concept from the drawing, in English, in teaching order.
 - [x] The author has confirmed the open interpretations.
 
@@ -70,10 +70,10 @@ The site keeps this order and this method. Its core is a **digital `HH:MM` clock
 - Configure the deploy workflow and enable Pages in the repo settings.
 
 **Success criteria**
-- [ ] The page loads locally (`python3 -m http.server`) with no console errors.
-- [ ] Pushing to `main` triggers the workflow, and it finishes green.
-- [ ] The site is live at `https://<user>.github.io/clocking/`.
-- [ ] All asset paths are relative, so nothing 404s under the `/clocking/` sub-path.
+- [x] The page loads locally (`python3 -m http.server`) with no console errors.
+- [x] Pushing to `main` triggers the workflow, and it finishes green.
+- [x] The site is live at `https://taldo17k.github.io/clocking/`.
+- [x] All asset paths are relative, so nothing 404s under the `/clocking/` sub-path.
 
 ---
 
@@ -85,8 +85,8 @@ The site keeps this order and this method. Its core is a **digital `HH:MM` clock
 - Define CSS custom properties, and make the layout mobile-first and responsive.
 
 **Success criteria**
-- [ ] All colors and sizes come from CSS variables in one place.
-- [ ] Looks good at 360px, 768px and 1440px widths, with no horizontal scroll.
+- [x] All colors and sizes come from CSS variables in one place.
+- [x] Looks good at 360px, 768px and 1440px widths, with no horizontal scroll.
 - [ ] Text contrast meets WCAG AA over every sky scene.
 - [ ] Lighthouse Accessibility score is 95 or higher.
 
@@ -99,20 +99,31 @@ The site keeps this order and this method. Its core is a **digital `HH:MM` clock
 - `spokenHour(h)` returns 1–12, where both 00 and 12 give "twelve".
 - `partOfDay(h)` returns one of night (00–05, 22–23), sunrise (06), morning (07–11), midday (12–14), afternoon (15–17), sunset (18) or evening (19–21).
 - `spoken(h, m)` returns English text, for example "eight fifteen in the morning", "two forty-five in the afternoon" or "ten thirty-nine at night".
+- `addMinutes(h, m, delta)` moves the time forward or back and wraps around midnight.
+- `amPm(h)` returns the 12-hour hint, for example `{ hour: 3, period: 'PM' }`.
+- `spokenLong(h, m)` returns the literal phrasing from the drawing, for example "eight and fifteen minutes in the morning".
 - `handAngles(h, m)` returns the hour-hand and minute-hand angles for the analog dial, plus which ring is active (inner for 00–11, outer for 12–23).
 
 **Success criteria**
-- [ ] Unit tests (`node --test`) cover all 24 hours of `pair`, `spokenHour`, `partOfDay` and `handAngles`.
-- [ ] Boundaries are correct: 14 is midday, 15 is afternoon, 18 is sunset, and 22 is night.
-- [ ] Both hours in a pair produce the same hour-hand angle, for example 03 and 15.
-- [ ] The two examples from the drawing produce the expected sentences: `08:15` and `22:39`.
-- [ ] Edge cases pass: `00:00`, `06:00`, `12:00`, `18:00`, `23:59`, and minutes `00`, `05` ("oh five") and `30`.
+- [x] Unit tests (`node --test`) cover all 24 hours of `pair`, `spokenHour`, `partOfDay` and `handAngles`.
+- [x] Boundaries are correct: 14 is midday, 15 is afternoon, 18 is sunset, and 22 is night.
+- [x] Both hours in a pair produce the same hour-hand angle, for example 03 and 15.
+- [x] The two examples from the drawing produce the expected sentences: `08:15` and `22:39`.
+- [x] Edge cases pass: `00:00`, `06:00`, `12:00`, `18:00`, `23:59`, and minutes `00`, `05` ("oh five") and `30`.
 
 ---
 
 ## Step 4: The interactive explorer (main screen)
 
 This is the drawing brought to life on one screen.
+
+**Layout (revised after the author's review):** from top to bottom:
+1. Title with the "Now" and "Play the day" buttons.
+2. **Hour pairs board**, full width and laid out like the drawing. The 00–11 scenes (night, sunrise, morning) are on the left, the 12–23 scenes (midday, afternoon, sunset, evening, night) on the right. Each scene is bracketed to its rows, and the current scene lights up. Tapping a scene jumps to it.
+3. **Two-ring clock**.
+4. **Digital clock** on its animated sky, with the spoken sentence.
+
+All the scenes are animated (`js/scene.js`, `css/scene.css`): layered hills, a sun with turning rays, a glowing moon, drifting clouds, flying birds, twinkling stars, shooting stars, evening fireflies, and a horizon glow at sunrise and sunset. The "Parts of the day" buttons were removed, because the side scenes do the same job.
 
 **Tasks**
 - **Digital clock `HH : MM`** with up and down controls (plus swipe, scroll and keyboard) for hours and for minutes. Hours are labeled "hours (00–23)" and minutes "minutes (00–59)", as in the "structure of the clock" section of the drawing.
@@ -121,20 +132,20 @@ This is the drawing brought to life on one screen.
 - **"How we say it"** line, for example "It's ten thirty-nine at night". It also shows a small AM/PM hint.
 - **"Now"** button for the current time, and a **"Play the day"** button that runs through 00:00 → 23:59 so the scenes and the highlighted row change.
 - **Two-ring analog clock**, placed underneath the digital clock, scene and table:
-  - The **inner ring** shows 1–12 with 12 at the top. The **outer ring** around it shows 13–24, with 24 (00) at the top.
+  - The **inner ring** shows 00–11, with 00 at the top (the left column of the table). The **outer ring** around it shows 12–23, with 12 at the top (the right column).
   - Hour and minute hands follow the time that is set. The active ring lights up: inner for 00–11 and outer for 12–23. The number the hour hand points to is highlighted on both rings, which shows the pair visually.
   - Dragging the hands (mouse or touch) or tapping a number on either ring sets the time. Everything above it (digital clock, scene, table, sentence) stays in sync.
   - The dial's background tint follows the current part of the day.
 
 **Success criteria**
-- [ ] Changing the hour from 23 to 00 wraps correctly, and minutes 59 → 00 increase the hour.
-- [ ] The scene, the highlighted row and the spoken sentence always agree with the hours shown.
-- [ ] Works with mouse, touch and keyboard. Screen readers hear the time and the spoken sentence (`aria-live`).
-- [ ] "Play the day" goes through all 8 scenes in order: night → sunrise → morning → midday → afternoon → sunset → evening → night.
-- [ ] The analog dial and the digital clock always show the same time, whichever one was changed.
-- [ ] Dragging the hour hand clockwise past the top moves from 11 to 12 (onto the outer ring) and from 23 to 00 (back to the inner ring).
-- [ ] Tapping 15 on the outer ring and tapping 3 on the inner ring point the hand at the same spot, but produce 15:xx and 03:xx respectively.
-- [ ] The dial is readable at 360px width, with ring numbers at least 14px.
+- [x] Changing the hour from 23 to 00 wraps correctly, and minutes 59 → 00 increase the hour.
+- [x] The scene, the highlighted row and the spoken sentence always agree with the hours shown.
+- [x] Works with mouse, touch and keyboard. Screen readers hear the time and the spoken sentence (`aria-live`).
+- [x] "Play the day" goes through all 8 scenes in order: night → sunrise → morning → midday → afternoon → sunset → evening → night.
+- [x] The analog dial and the digital clock always show the same time, whichever one was changed.
+- [x] Dragging the hour hand clockwise past the top moves from 11 to 12 (onto the outer ring) and from 23 to 00 (back to the inner ring).
+- [x] Tapping 15 on the outer ring and tapping 3 on the inner ring point the hand at the same spot, but produce 15:xx and 03:xx respectively.
+- [x] The dial is readable at 360px width, with ring numbers at least 14px.
 
 ---
 

@@ -1,0 +1,275 @@
+/* ==========================================================================
+   Animated sky scenes (one per part of the day), built by js/scene.js.
+   A scene fills whatever box it is given: a thin strip next to the pairs
+   table or the wide stage behind the digital clock. Sizes use container
+   units (cqmin/cqw/cqh) so the drawing scales with its box.
+   ========================================================================== */
+
+/* Registered so the colors fade smoothly when a scene changes phase. */
+@property --sky-1 { syntax: '<color>'; inherits: true; initial-value: #7cc8ec; }
+@property --sky-2 { syntax: '<color>'; inherits: true; initial-value: #b9e5f7; }
+@property --sky-3 { syntax: '<color>'; inherits: true; initial-value: #f1fbff; }
+@property --hill-1 { syntax: '<color>'; inherits: true; initial-value: #6fb98a; }
+@property --hill-2 { syntax: '<color>'; inherits: true; initial-value: #8fcca0; }
+@property --hill-3 { syntax: '<color>'; inherits: true; initial-value: #b3dfc0; }
+@property --glow { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --cloud { syntax: '<color>'; inherits: true; initial-value: #ffffff; }
+
+/* --------------------------------------------------------------------------
+   Part-of-day palettes, taken from the drawings on the original page.
+   Any element with data-phase="…" gets these tokens (scenes, the dial face,
+   the little dots next to each hour).
+   -------------------------------------------------------------------------- */
+[data-phase] {
+  --orb-x: 50%; --orb-y: 20%;
+  --show-sun: 1; --show-moon: 0; --show-stars: 0; --show-clouds: 1;
+  --show-birds: 0; --show-flies: 0; --show-shoot: 0; --show-glow: 0;
+}
+[data-phase='night'] {
+  --sky-1: #050616; --sky-2: #12153a; --sky-3: #262a5c;
+  --hill-1: #0b0c1f; --hill-2: #141634; --hill-3: #1f2250;
+  --glow: #3b3f8a; --cloud: #2c3066;
+  --orb-x: 26%; --orb-y: 16%;
+  --show-sun: 0; --show-moon: 1; --show-stars: 1; --show-clouds: 0; --show-shoot: 1;
+}
+[data-phase='sunrise'] {
+  --sky-1: #3d2b72; --sky-2: #c46c9f; --sky-3: #ffc08a;
+  --hill-1: #7d3560; --hill-2: #a8497a; --hill-3: #d27aa0;
+  --glow: #ffd27a; --cloud: #ffc2c8;
+  --orb-x: 16%; --orb-y: 46%;
+  --show-stars: 0.25; --show-glow: 1;
+}
+[data-phase='morning'] {
+  --sky-1: #6ec2ea; --sky-2: #ace0f6; --sky-3: #ecf9ff;
+  --hill-1: #5aa877; --hill-2: #7fc292; --hill-3: #acdcbb;
+  --glow: #fff3c4; --cloud: #ffffff;
+  --orb-x: 28%; --orb-y: 30%;
+  --show-birds: 1;
+}
+[data-phase='midday'] {
+  --sky-1: #1683cf; --sky-2: #42aee6; --sky-3: #a6dcf5;
+  --hill-1: #3e9f5c; --hill-2: #5fb878; --hill-3: #8fd3a0;
+  --glow: #ffffff; --cloud: #ffffff;
+  --orb-x: 52%; --orb-y: 10%;
+}
+[data-phase='afternoon'] {
+  --sky-1: #3596d2; --sky-2: #86c6e6; --sky-3: #f6dd9c;
+  --hill-1: #5d9a52; --hill-2: #80b46b; --hill-3: #b1d094;
+  --glow: #ffe2a0; --cloud: #fff6e6;
+  --orb-x: 74%; --orb-y: 24%;
+  --show-birds: 1;
+}
+[data-phase='sunset'] {
+  --sky-1: #2a1b58; --sky-2: #a2407a; --sky-3: #ff8a4c;
+  --hill-1: #22173f; --hill-2: #362659; --hill-3: #523a7c;
+  --glow: #ffb15c; --cloud: #ff9fa0;
+  --orb-x: 84%; --orb-y: 46%;
+  --show-stars: 0.3; --show-glow: 1;
+}
+[data-phase='evening'] {
+  --sky-1: #0d0f34; --sky-2: #30286a; --sky-3: #74508f;
+  --hill-1: #120f30; --hill-2: #1d1a45; --hill-3: #2c285e;
+  --glow: #8a5aa0; --cloud: #4a3f80;
+  --orb-x: 72%; --orb-y: 18%;
+  --show-sun: 0; --show-moon: 1; --show-stars: 0.75; --show-clouds: 0; --show-flies: 1;
+}
+
+/* Behind the digital clock the middle is covered by the clock card,
+   so the midday sun moves to the side there. */
+.scene.stage-scene[data-phase='midday'] { --orb-x: 82%; }
+
+/* --------------------------------------------------------------------------
+   Scene structure
+   -------------------------------------------------------------------------- */
+.scene {
+  --orb-size: clamp(14px, 30cqmin, 96px);
+  --fade: 900ms;
+  position: relative;
+  overflow: hidden;
+  container-type: size;
+  isolation: isolate;
+  transition:
+    --sky-1 var(--fade) var(--ease), --sky-2 var(--fade) var(--ease), --sky-3 var(--fade) var(--ease),
+    --hill-1 var(--fade) var(--ease), --hill-2 var(--fade) var(--ease), --hill-3 var(--fade) var(--ease),
+    --glow var(--fade) var(--ease), --cloud var(--fade) var(--ease);
+}
+.scene > * { position: absolute; pointer-events: none; }
+.scene-layer-fade { transition: opacity var(--fade) var(--ease); }
+
+.scene-sky {
+  inset: 0;
+  background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 55%, var(--sky-3) 100%);
+}
+
+/* Warm light on the horizon at sunrise / sunset */
+.scene-glow {
+  inset: 0;
+  opacity: var(--show-glow);
+  background: radial-gradient(70% 45% at var(--orb-x) 72%, var(--glow) 0%, transparent 70%);
+  animation: glow-breathe 7s ease-in-out infinite alternate;
+}
+
+/* Stars */
+.scene-stars { inset: 0 0 25% 0; opacity: var(--show-stars); }
+.star {
+  position: absolute;
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: #fffbd6;
+  box-shadow: 0 0 calc(var(--s) * 2) rgba(255, 251, 214, 0.8);
+  animation: twinkle var(--d) ease-in-out var(--delay) infinite alternate;
+}
+.star.big::before,
+.star.big::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--s) * 4);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #fffbd6, transparent);
+  transform: translate(-50%, -50%);
+}
+.star.big::after { transform: translate(-50%, -50%) rotate(90deg); }
+
+/* Shooting star (night only) */
+.scene-shoot {
+  top: 12%;
+  left: 60%;
+  width: 22cqw;
+  height: 2px;
+  opacity: var(--show-shoot);
+}
+.scene-shoot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), transparent);
+  transform-origin: left center;
+  animation: shoot 9s ease-in var(--shoot-delay, 2s) infinite;
+  opacity: 0;
+}
+
+/* Sun and moon */
+.scene-orb {
+  width: var(--orb-size);
+  height: var(--orb-size);
+  left: calc(var(--orb-x) - var(--orb-size) / 2);
+  top: var(--orb-y);
+  transition: left var(--fade) var(--ease), top var(--fade) var(--ease);
+}
+.scene-orb svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.sun { opacity: var(--show-sun); }
+.sun-rays { animation: spin 50s linear infinite; transform-origin: center; transform-box: fill-box; }
+.sun-rays line { stroke: #ffcf3a; stroke-width: 5; stroke-linecap: round; }
+.sun-halo { fill: #ffe68a; opacity: 0.35; animation: pulse 4s ease-in-out infinite alternate; transform-origin: center; transform-box: fill-box; }
+.sun-core { fill: #ffd23f; stroke: #ffb21f; stroke-width: 3; }
+.sun-shine { fill: #fff3b0; opacity: 0.8; }
+.moon { opacity: var(--show-moon); animation: float 8s ease-in-out infinite alternate; }
+.moon-body { fill: #f6f1a2; filter: drop-shadow(0 0 5px rgba(246, 241, 162, 0.85)) drop-shadow(0 0 14px rgba(246, 241, 162, 0.35)); }
+.moon-crater { fill: #e0d978; opacity: 0.7; }
+
+/* Sunrise rises a little, sunset sinks a little */
+[data-phase='sunrise'] .scene-orb { animation: bob-up 10s ease-in-out infinite alternate; }
+[data-phase='sunset'] .scene-orb { animation: bob-down 10s ease-in-out infinite alternate; }
+
+/* Clouds */
+.scene-clouds { inset: 0 0 30% 0; opacity: var(--show-clouds); }
+.cloud {
+  position: absolute;
+  left: 0;
+  top: var(--y);
+  width: var(--w);
+  fill: var(--cloud);
+  opacity: 0.92;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.06));
+  animation: drift var(--d) linear var(--delay) infinite;
+}
+
+/* Birds */
+.scene-birds { inset: 0 0 35% 0; opacity: var(--show-birds); }
+.bird {
+  position: absolute;
+  left: 0;
+  top: var(--y);
+  width: clamp(8px, 7cqmin, 22px);
+  animation: drift var(--d) linear var(--delay) infinite;
+}
+.bird path {
+  fill: none;
+  stroke: #2b2a33;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: flap 0.6s ease-in-out infinite alternate;
+}
+
+/* Hills: three layers, like the drawn hills on the page */
+.scene-hills { left: 0; right: 0; bottom: 0; width: 100%; height: 34%; }
+.hill-3 { fill: var(--hill-3); }
+.hill-2 { fill: var(--hill-2); }
+.hill-1 { fill: var(--hill-1); }
+
+/* Fireflies (evening) */
+.scene-flies { inset: 55% 0 0 0; opacity: var(--show-flies); }
+.fly {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #f4ff8a;
+  box-shadow: 0 0 6px 2px rgba(244, 255, 138, 0.8);
+  animation: wander var(--d) ease-in-out var(--delay) infinite alternate, flicker 2.2s ease-in-out var(--delay) infinite alternate;
+}
+
+/* Fade layers when the phase changes */
+.scene-glow, .scene-stars, .scene-shoot, .sun, .moon, .scene-clouds, .scene-birds, .scene-flies {
+  transition: opacity var(--fade) var(--ease);
+}
+
+/* Small boxes: drop the busy details */
+@container (max-height: 70px) {
+  .scene-clouds, .scene-birds, .scene-flies, .scene-shoot { display: none; }
+  .scene-hills { height: 40%; }
+}
+@container (max-width: 90px) {
+  .scene-birds, .scene-shoot { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Keyframes
+   -------------------------------------------------------------------------- */
+@keyframes twinkle { from { opacity: 0.25; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { from { transform: scale(0.92); } to { transform: scale(1.08); } }
+@keyframes float { from { transform: translateY(-3%); } to { transform: translateY(3%); } }
+@keyframes bob-up { from { transform: translateY(6%); } to { transform: translateY(-6%); } }
+@keyframes bob-down { from { transform: translateY(-6%); } to { transform: translateY(6%); } }
+@keyframes glow-breathe { from { filter: brightness(0.92); } to { filter: brightness(1.1); } }
+@keyframes drift {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(calc(100cqw + 20%)); }
+}
+@keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(0.35); } }
+@keyframes shoot {
+  0% { opacity: 0; transform: translate(0, 0) rotate(155deg) scaleX(0.2); }
+  3% { opacity: 1; }
+  9% { opacity: 0; transform: translate(-30cqw, 18cqh) rotate(155deg) scaleX(1); }
+  100% { opacity: 0; transform: translate(-30cqw, 18cqh) rotate(155deg) scaleX(1); }
+}
+@keyframes wander {
+  from { transform: translate(0, 0); }
+  to { transform: translate(var(--dx), var(--dy)); }
+}
+@keyframes flicker { from { opacity: 0.2; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .scene *, .scene *::before, .scene *::after { animation: none !important; }
+  .scene-shoot { display: none; }
+}

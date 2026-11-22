@@ -22,6 +22,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: Run tests
+        run: node --test tests/*.test.js
       - uses: actions/configure-pages@v5
       # Only the site/ folder is published; PLAN.md and documents/ stay out of the live site.
       - uses: actions/upload-pages-artifact@v3

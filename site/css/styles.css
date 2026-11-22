@@ -81,51 +81,6 @@
 }
 
 /* --------------------------------------------------------------------------
-   Part-of-day palettes (taken from the drawings on the original page).
-   Any element with data-phase="…" gets these sky tokens.
-   -------------------------------------------------------------------------- */
-[data-phase] {
-  --sky-1: #a9def2; --sky-2: #e6f6fb;
-  --orb: #ffd23f; --orb-y: 30%; --orb-x: 72%;
-  --ground: #9fd0e0; --stars: 0; --moon: 0;
-}
-[data-phase='night'] {
-  --sky-1: #07081a; --sky-2: #22244a;
-  --orb: #f3ef8a; --orb-y: 18%; --orb-x: 22%;
-  --ground: #14152b; --stars: 1; --moon: 1;
-}
-[data-phase='sunrise'] {
-  --sky-1: #5b3c88; --sky-2: #f5a3b5;
-  --orb: #ffd23f; --orb-y: 64%; --orb-x: 18%;
-  --ground: #c4607f; --stars: 0.15; --moon: 0;
-}
-[data-phase='morning'] {
-  --sky-1: #8fd3ee; --sky-2: #e8f7fc;
-  --orb: #ffd23f; --orb-y: 38%; --orb-x: 24%;
-  --ground: #a7d9c0; --stars: 0; --moon: 0;
-}
-[data-phase='midday'] {
-  --sky-1: #2fa6d9; --sky-2: #a6e0f4;
-  --orb: #ffcc1a; --orb-y: 12%; --orb-x: 50%;
-  --ground: #86c99b; --stars: 0; --moon: 0;
-}
-[data-phase='afternoon'] {
-  --sky-1: #5cb8e0; --sky-2: #f6e2a8;
-  --orb: #ffb627; --orb-y: 32%; --orb-x: 76%;
-  --ground: #9cc48a; --stars: 0; --moon: 0;
-}
-[data-phase='sunset'] {
-  --sky-1: #4a2f7a; --sky-2: #ff8a4c;
-  --orb: #ffd23f; --orb-y: 64%; --orb-x: 82%;
-  --ground: #3a2a5e; --stars: 0.2; --moon: 0;
-}
-[data-phase='evening'] {
-  --sky-1: #15163a; --sky-2: #4b3f80;
-  --orb: #f3ef8a; --orb-y: 22%; --orb-x: 76%;
-  --ground: #1d1c3c; --stars: 0.7; --moon: 1;
-}
-
-/* --------------------------------------------------------------------------
    Base
    -------------------------------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -133,11 +88,22 @@
 html { -webkit-text-size-adjust: 100%; }
 
 body {
+  /* Page background: soft time-of-day tint on dotted paper (see main.js, which
+     sets data-phase on <body>). The sky colors are registered in scene.css,
+     so the tint fades between parts of the day. */
+  --page-top: color-mix(in srgb, var(--sky-2) 32%, var(--paper));
+  --page-bottom: color-mix(in srgb, var(--sky-3) 42%, var(--paper));
+  --page-dot: color-mix(in srgb, var(--ink) 14%, transparent);
   margin: 0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--paper);
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(var(--page-dot) 1.2px, transparent 1.6px),
+    linear-gradient(180deg, var(--page-top), var(--page-bottom));
+  background-size: 22px 22px, 100% 100%;
+  transition: --sky-2 1.2s var(--ease), --sky-3 1.2s var(--ease);
   color: var(--ink);
   font-family: var(--font-body);
   font-size: var(--fs-md);
@@ -225,7 +191,8 @@ a { color: inherit; }
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
-  padding: var(--sp-6) var(--sp-4) var(--sp-5);
+  /* top padding leaves room for the part-of-day label */
+  padding: 4.5rem var(--sp-4) var(--sp-5);
   min-height: 340px;
   display: flex;
   flex-direction: column;
@@ -234,74 +201,10 @@ a { color: inherit; }
   gap: var(--sp-4);
 }
 
-.sky {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(180deg, var(--sky-1), var(--sky-2));
-  transition: background var(--t-scene) var(--ease);
-}
-
-.stars {
-  position: absolute;
-  inset: 0 0 30% 0;
-  opacity: var(--stars);
-  transition: opacity var(--t-scene) var(--ease);
-  background-image:
-    radial-gradient(2px 2px at 12% 22%, #fff9c4 50%, transparent 51%),
-    radial-gradient(2.5px 2.5px at 34% 12%, #fff9c4 50%, transparent 51%),
-    radial-gradient(2px 2px at 58% 30%, #fff9c4 50%, transparent 51%),
-    radial-gradient(3px 3px at 82% 16%, #fff9c4 50%, transparent 51%),
-    radial-gradient(2px 2px at 90% 44%, #fff9c4 50%, transparent 51%),
-    radial-gradient(2.5px 2.5px at 46% 52%, #fff9c4 50%, transparent 51%),
-    radial-gradient(2px 2px at 8% 56%, #fff9c4 50%, transparent 51%),
-    radial-gradient(2px 2px at 68% 8%, #fff9c4 50%, transparent 51%);
-}
-
-/* The sun (or the moon when --moon is 1) */
-.orb {
-  --size: clamp(56px, 12vw, 84px);
-  position: absolute;
-  width: var(--size);
-  height: var(--size);
-  left: calc(var(--orb-x) - var(--size) / 2);
-  top: var(--orb-y);
-  border-radius: 50%;
-  background: var(--orb);
-  box-shadow: 0 0 0 10px color-mix(in srgb, var(--orb) 35%, transparent),
-              0 0 40px 18px color-mix(in srgb, var(--orb) 45%, transparent);
-  transition: left var(--t-scene) var(--ease), top var(--t-scene) var(--ease),
-              background var(--t-scene) var(--ease), box-shadow var(--t-scene) var(--ease);
-}
-/* Crescent moon: cut the disc with a sky-colored circle */
-.orb::after {
-  content: '';
-  position: absolute;
-  inset: -2px -2px -2px 28%;
-  border-radius: 50%;
-  background: var(--sky-1);
-  opacity: var(--moon);
-  transition: opacity var(--t-scene) var(--ease), background var(--t-scene) var(--ease);
-}
-[data-phase='night'] .orb,
-[data-phase='evening'] .orb { box-shadow: 0 0 24px 4px color-mix(in srgb, var(--orb) 30%, transparent); }
-
-/* Rolling hills, like on the sunrise/sunset drawings */
-.ground {
-  position: absolute;
-  left: -10%;
-  right: -10%;
-  bottom: -40px;
-  height: 120px;
-  background:
-    radial-gradient(60% 100% at 20% 100%, var(--ground) 70%, transparent 71%),
-    radial-gradient(55% 90% at 75% 100%, var(--ground) 70%, transparent 71%),
-    linear-gradient(var(--ground), var(--ground)) bottom / 100% 72px no-repeat;
-  filter: brightness(0.95);
-  transition: background var(--t-scene) var(--ease);
-}
+.scene.stage-scene { position: absolute; inset: 0; z-index: -1; }
 
 .phase-label {
+  z-index: 1;
   position: absolute;
   top: var(--sp-4);
   right: var(--sp-4);
@@ -325,7 +228,7 @@ a { color: inherit; }
 /* Digital clock: each digit sits on a "blank", like _ _ : _ _ on the page */
 .digital {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   gap: 0.08em;
   font-family: var(--font-display);
@@ -341,42 +244,115 @@ a { color: inherit; }
   border-bottom: 4px solid var(--line);
   border-radius: 0 0 2px 2px;
 }
-.colon { padding-inline: 0.06em; padding-bottom: 0.12em; }
+.colon { padding-inline: 0.06em; padding-bottom: 0.12em; align-self: center; }
+
+/* Hours / minutes spinners */
+.spin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.digits {
+  display: flex;
+  gap: 0.08em;
+  padding: 0.04em 0.06em;
+  border-radius: var(--radius-sm);
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.spin-btn {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.spin-btn:hover { background: var(--paper-2); color: var(--ink); }
+.spin-btn:active { background: var(--hl-green); color: var(--ink); }
+.spin-btn svg,
+.btn svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
 .digital-labels {
   display: flex;
   justify-content: space-between;
   gap: var(--sp-5);
-  margin-top: var(--sp-2);
+  margin-top: var(--sp-1);
   font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--ink-muted);
 }
 
-/* --------------------------------------------------------------------------
-   Parts-of-day chips
-   -------------------------------------------------------------------------- */
-.phases { padding-bottom: var(--sp-6); }
-
-.phase-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: var(--sp-3);
+/* "How we say it" */
+.say {
+  margin: var(--sp-3) 0 0;
+  padding-top: var(--sp-3);
+  border-top: 2px dashed color-mix(in srgb, var(--line) 30%, transparent);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--fs-lg);
+  line-height: 1.35;
+  max-width: 22ch;
+  margin-inline: auto;
+}
+.ampm {
+  display: inline-block;
+  margin-inline-start: var(--sp-1);
+  padding: 0 var(--sp-2);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-muted);
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
-.phase-chip {
-  width: 100%;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-areas: 'swatch name' 'swatch hours';
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-3);
+  margin-top: var(--sp-5);
+}
+.btn {
+  display: inline-flex;
   align-items: center;
-  column-gap: var(--sp-3);
-  padding: var(--sp-2) var(--sp-3);
-  font: inherit;
-  text-align: start;
+  gap: var(--sp-2);
+  min-height: 46px;
+  padding: var(--sp-2) var(--sp-5);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-md);
   color: var(--ink);
   background: var(--card);
   border: var(--border-w) solid var(--line);
@@ -385,29 +361,299 @@ a { color: inherit; }
   cursor: pointer;
   transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
 }
-.phase-chip:hover { transform: translate(-1px, -1px); box-shadow: 3px 4px 0 0 var(--line); }
-.phase-chip:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 0 var(--line); }
-.phase-chip[aria-pressed='true'] { background: var(--hl-green); }
+.btn svg { width: 20px; height: 20px; stroke-width: 2.5; }
+.btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 4px 0 0 var(--line); }
+.btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 0 var(--line); }
+.btn-accent { background: var(--hl-green); }
+.btn[aria-pressed='true'] { background: var(--hl-pink); }
 
-.swatch {
-  grid-area: swatch;
-  width: 40px;
-  height: 40px;
+/* Faster sky changes while the day is playing */
+.is-playing { --t-scene: 350ms; }
+.is-playing .scene { --fade: 350ms; }
+
+/* --------------------------------------------------------------------------
+   Page sections
+   -------------------------------------------------------------------------- */
+main > section + section { margin-top: var(--sp-6); }
+main > section:last-child { margin-bottom: var(--sp-6); }
+.panel { padding: var(--sp-5) var(--sp-4); min-width: 0; }
+.panel > .muted,
+.stage-section > .muted { font-size: var(--fs-sm); }
+
+/* --------------------------------------------------------------------------
+   Hour pairs board: scenes | bracket | 00–11 = 12–23 | bracket | scenes
+   -------------------------------------------------------------------------- */
+.pairs-board {
+  --row-h: 46px;
+  --row-mid: calc(var(--row-h) * 1.9); /* the 06 = 18 row: taller, for the sunrise/sunset pictures */
+  position: relative;
+  display: grid;
+  grid-template-columns:
+    [sl] minmax(0, 1fr) [bl] 14px [hl] auto [eq] 2.25rem [hr] auto [hr-end br] 14px [sr] minmax(0, 1fr) [end];
+  grid-template-rows: auto repeat(6, var(--row-h)) var(--row-mid) repeat(5, var(--row-h));
+  column-gap: var(--sp-2);
+  align-items: center;
+  max-width: 900px;
+  margin-inline: auto;
+}
+.pairs-head {
+  padding-bottom: var(--sp-1);
+  text-align: center;
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  color: var(--ink-muted);
+}
+
+/* Highlighter that slides to the current row */
+.pairs-row-hl {
+  align-self: start;
+  height: var(--row-h);
+  margin: 0 -6px;
+  border-radius: 14px;
+  background: var(--hl-green);
+  transform: translateY(var(--row-y, 0px));
+  transition: transform 350ms var(--ease);
+}
+.is-playing .pairs-row-hl { transition-duration: 60ms; }
+
+.pairs-eq {
+  position: relative;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--ink-muted);
+}
+
+.hour-btn {
+  position: relative;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-width: 4.4rem;
+  min-height: 38px;
+  padding: 0 var(--sp-3) 0 var(--sp-2);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--ink);
+  background: transparent;
+  border: 2.5px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+.hour-btn::before {
+  content: '';
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: linear-gradient(180deg, var(--sky-1), var(--sky-3));
+}
+.hour-btn:hover { background: color-mix(in srgb, var(--paper-2) 80%, transparent); }
+.hour-btn.is-pair { border-color: var(--line); border-style: dashed; background: var(--card); }
+.hour-btn.is-active { border-color: var(--line); background: var(--card); box-shadow: var(--shadow-sm); }
+
+/* Brackets, like the hand-drawn [ and ] on the page */
+.pairs-bracket {
+  align-self: stretch;
+  margin-block: 7px;
+  border: 3px solid var(--line);
+  opacity: 0.3;
+  transition: opacity 300ms var(--ease);
+}
+.pairs-bracket-left { border-right: 0; border-radius: 10px 0 0 10px; }
+.pairs-bracket-right { border-left: 0; border-radius: 0 10px 10px 0; }
+.pairs-bracket.is-active { opacity: 1; }
+
+/* Scenes next to the table */
+.pairs-scene {
+  position: relative;
+  align-self: stretch;
+  margin-block: 3px;
+  padding: 0;
+  overflow: hidden;
+  container-type: size;
+  background: none;
+  border: var(--border-w) solid var(--line);
+  border-radius: 14px;
+  cursor: pointer;
+  filter: saturate(0.8) brightness(0.96);
+  transition: filter 400ms var(--ease), opacity 400ms var(--ease), box-shadow 200ms var(--ease), transform 200ms var(--ease);
+}
+.pairs-scene > .scene { position: absolute; inset: 0; }
+.pairs-scene:hover { filter: none; transform: translateY(-1px); }
+.pairs-scene.is-active {
+  filter: none;
+  box-shadow: 0 0 0 4px var(--hl-green), var(--shadow);
+}
+.pairs-scene-label {
+  position: absolute;
+  z-index: 2;
+  top: 6px;
+  left: 6px;
+  padding: 0 var(--sp-2);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+.pairs-scene-right .pairs-scene-label { left: auto; right: 6px; }
+.pairs-scene.is-active .pairs-scene-label { background: var(--hl-green); }
+/* One-row scenes (sunrise, sunset): center a smaller label */
+@container (max-height: 60px) {
+  .pairs-scene-label { top: 50%; transform: translateY(-50%); font-size: 0.75rem; line-height: 1.3; }
+}
+/* Narrow tall scenes on phones: label runs vertically */
+@container (max-width: 110px) and (min-height: 61px) {
+  .pairs-scene-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    padding: var(--sp-2) 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+}
+@container (max-width: 110px) and (max-height: 60px) {
+  .pairs-scene-label,
+  .pairs-scene-right .pairs-scene-label { left: 50%; right: auto; transform: translate(-50%, -50%); font-size: 0.68rem; padding: 0 3px; }
+}
+
+/* Two-ring dial */
+.dial { max-width: 420px; margin-inline: auto; }
+.dial-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 50%;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+.dial.is-dragging .dial-svg { cursor: grabbing; }
+.dial-wrap { position: relative; }
+.scene.dial-scene { position: absolute; inset: 1.875%; border-radius: 50%; pointer-events: none; }
+.dial-wrap .dial-svg { position: relative; z-index: 1; }
+.face { fill: transparent; stroke: var(--line); stroke-width: 3; }
+/* Number rings sit on frosted bands so they stay readable over any sky */
+.rim { fill: none; stroke: color-mix(in srgb, var(--card) 55%, transparent); stroke-width: 11; }
+/* Rings are nearly clear so the sky shows through the whole face */
+.band { fill: none; stroke: color-mix(in srgb, var(--card) 14%, transparent); stroke-width: 40; transition: stroke 400ms var(--ease); }
+.band-outer { stroke-width: 38; }
+.dial[data-ring='inner'] .band-inner,
+.dial[data-ring='outer'] .band-outer { stroke: color-mix(in srgb, #ffd23f 22%, transparent); }
+/* The ring in use gets a warm golden glow along its edges */
+.ring-edge {
+  fill: none;
+  stroke: #ffd23f;
+  stroke-width: 3;
+  opacity: 0;
+  filter: drop-shadow(0 0 4px rgba(255, 210, 63, 0.9));
+  transition: opacity 400ms var(--ease);
+}
+.dial[data-ring='inner'] .ring-edge-inner,
+.dial[data-ring='outer'] .ring-edge-outer { opacity: 1; }
+.ring-line { fill: none; stroke: var(--line); stroke-width: 1.5; opacity: 0.3; }
+.tick { stroke: var(--line); stroke-width: 1.5; opacity: 0.6; }
+.tick.major { stroke-width: 3; opacity: 1; }
+
+.num { cursor: pointer; }
+.num text {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  fill: var(--ink);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.num-outer text { font-size: 16px; }
+.num { transition: opacity 400ms var(--ease); }
+/* Each number sits on a small frosted chip so it reads over any sky */
+.num-bg {
+  fill: color-mix(in srgb, var(--card) 88%, transparent);
+  stroke: color-mix(in srgb, var(--line) 25%, transparent);
+  stroke-width: 1;
+  transition: fill var(--t-fast);
+}
+.dial[data-ring='inner'] .num-outer:not(.is-pair),
+.dial[data-ring='outer'] .num-inner:not(.is-pair) { opacity: 0.62; }
+.num:hover .num-bg { fill: var(--paper-2); }
+.num.is-pair .num-bg { fill: var(--card); stroke: var(--line); stroke-width: 2; stroke-dasharray: 4 3; }
+.num.is-active .num-bg { fill: var(--ink); stroke: #ffd23f; stroke-width: 2.5; stroke-dasharray: none; }
+.num.is-active text { fill: var(--card); }
+
+.hand {
+  transform-box: view-box;
+  transform-origin: 160px 160px;
+  transition: transform 280ms var(--ease);
+}
+.dial.is-dragging .hand,
+.is-playing .hand { transition: none; }
+.hand-line { stroke: var(--line); stroke-linecap: round; }
+.hand-outline { stroke: var(--card); stroke-linecap: round; }
+.hand-hour .hand-outline { stroke-width: 11; }
+.hand-minute .hand-outline { stroke-width: 8; }
+.hand-hour .hand-line { stroke-width: 7; }
+.hand-minute .hand-line { stroke-width: 4; }
+.hand-hit { stroke: transparent; stroke-width: 30; stroke-linecap: round; }
+.hub { fill: var(--line); stroke: var(--card); stroke-width: 2.5; }
+
+.dial-legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-2) var(--sp-4);
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+.dial-legend li { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.dial-legend li::before {
+  content: '';
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   border: 2px solid var(--line);
-  background:
-    radial-gradient(circle at 65% 35%, var(--orb) 0 22%, transparent 23%),
-    linear-gradient(180deg, var(--sky-1), var(--sky-2));
+  background: var(--card);
 }
-.chip-name { grid-area: name; font-family: var(--font-display); font-weight: 600; line-height: 1.2; }
-.chip-hours { grid-area: hours; font-size: var(--fs-sm); color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.dial-legend .legend-inner::before { border-width: 2px; box-shadow: inset 0 0 0 3px var(--card), inset 0 0 0 8px var(--line); }
+.dial-legend .legend-outer::before { box-shadow: inset 0 0 0 4px var(--line); }
+.dial[data-ring='inner'] .legend-inner,
+.dial[data-ring='outer'] .legend-outer { color: var(--ink); }
 
 /* --------------------------------------------------------------------------
    Responsive
    -------------------------------------------------------------------------- */
 @media (min-width: 768px) {
   .stage { min-height: 420px; padding-bottom: var(--sp-6); }
-  .hero { padding-block: var(--sp-5) var(--sp-7); }
+  .hero { padding-block: var(--sp-5) var(--sp-6); }
+}
+@media (max-width: 599px) {
+  .panel { padding: var(--sp-4) var(--sp-3); }
+  .pairs-board {
+    --row-h: 42px;
+    --row-mid: calc(var(--row-h) * 1.5);
+    grid-template-columns:
+      [sl] minmax(0, 1fr) [bl] 8px [hl] auto [eq] 1.1rem [hr] auto [hr-end br] 8px [sr] minmax(0, 1fr) [end];
+    column-gap: 4px;
+  }
+  .hour-btn { min-width: 3.2rem; padding: 0 var(--sp-2); font-size: 1.1rem; }
+  .hour-btn::before { display: none; }
+  .pairs-row-hl { margin-inline: -3px; }
 }
 
 /* --------------------------------------------------------------------------
@@ -419,4 +665,120 @@ a { color: inherit; }
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/* Hero: buttons sit under the intro text */
+.hero .controls { justify-content: flex-start; margin-top: var(--sp-4); }
+.hero { padding-bottom: var(--sp-5); }
+
+/* --------------------------------------------------------------------------
+   Centered headings and intro text
+   -------------------------------------------------------------------------- */
+.hero { text-align: center; }
+.hero-lead { margin-inline: auto; }
+.hero .controls { justify-content: center; }
+.panel > h2,
+.panel > .muted,
+.stage-section > h2,
+.stage-section > .muted { text-align: center; }
+.panel > .muted,
+.stage-section > .muted { max-width: 52ch; margin-inline: auto; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) body {
+    --page-top: color-mix(in srgb, var(--sky-2) 55%, #07080f);
+    --page-bottom: color-mix(in srgb, var(--sky-3) 35%, #07080f);
+    --page-dot: rgba(255, 255, 255, 0.07);
+  }
+}
+:root[data-theme='dark'] body {
+  --page-top: color-mix(in srgb, var(--sky-2) 55%, #07080f);
+  --page-bottom: color-mix(in srgb, var(--sky-3) 35%, #07080f);
+  --page-dot: rgba(255, 255, 255, 0.07);
+}
+
+/* --------------------------------------------------------------------------
+   Panel backgrounds (Hour pairs, two-ring clock)
+   Light: airy sky with slow drifting clouds. Dark: black starry night.
+   -------------------------------------------------------------------------- */
+.panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(180deg, #eef7ff 0%, #ffffff 40%, #ffffff 70%, #fff6e6 100%);
+}
+.panel::before,
+.panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.panel::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 42'%3E%3Cpath fill='%23dcecf8' d='M14 38 a12 12 0 0 1 1-24 a17 17 0 0 1 32-7 a14 14 0 0 1 26 7 a12 12 0 0 1 13 24 z'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 42'%3E%3Cpath fill='%23fbe9d6' d='M14 38 a12 12 0 0 1 1-24 a17 17 0 0 1 32-7 a14 14 0 0 1 26 7 a12 12 0 0 1 13 24 z'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 420px 60px, 300px 42px;
+  background-position: 0 18px, 140px 62%;
+  opacity: 0.85;
+  animation: panel-breeze 90s linear infinite;
+}
+@keyframes panel-breeze {
+  to { background-position: 420px 18px, 740px 62%; }
+}
+@keyframes panel-twinkle {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .panel {
+    --card: #15172a;
+    background:
+      radial-gradient(60% 45% at 12% 8%, rgba(120, 80, 190, 0.28), transparent 70%),
+      radial-gradient(55% 40% at 92% 92%, rgba(60, 110, 200, 0.22), transparent 70%),
+      radial-gradient(120% 90% at 50% 0%, #0c0e1e 0%, #04050b 60%, #010103 100%);
+  }
+  :root:not([data-theme='light']) .panel::before {
+    opacity: 0.9;
+    background-image:
+      radial-gradient(2px 2px at 20px 30px, #ffffff 50%, transparent 51%),
+      radial-gradient(2px 2px at 95px 85px, rgba(255, 255, 255, 0.75) 50%, transparent 51%),
+      radial-gradient(2.5px 2.5px at 55px 125px, #fffbd6 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 125px 15px, rgba(255, 255, 255, 0.6) 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 10px 100px, rgba(255, 255, 255, 0.55) 50%, transparent 51%);
+    background-size: 140px 140px;
+  }
+  :root:not([data-theme='light']) .panel::after {
+    background-image:
+      radial-gradient(3px 3px at 40px 60px, #fffbd6 50%, transparent 51%),
+      radial-gradient(2.5px 2.5px at 180px 170px, #ffffff 50%, transparent 51%),
+      radial-gradient(3px 3px at 150px 30px, #dfe8ff 50%, transparent 51%);
+    background-size: 230px 230px;
+    animation: panel-twinkle 3.5s ease-in-out infinite alternate;
+  }
+}
+:root[data-theme='dark'] .panel {
+  --card: #15172a;
+  background:
+    radial-gradient(60% 45% at 12% 8%, rgba(120, 80, 190, 0.28), transparent 70%),
+    radial-gradient(55% 40% at 92% 92%, rgba(60, 110, 200, 0.22), transparent 70%),
+    radial-gradient(120% 90% at 50% 0%, #0c0e1e 0%, #04050b 60%, #010103 100%);
+}
+:root[data-theme='dark'] .panel::before {
+  opacity: 0.9;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #ffffff 50%, transparent 51%),
+    radial-gradient(2px 2px at 95px 85px, rgba(255, 255, 255, 0.75) 50%, transparent 51%),
+    radial-gradient(2.5px 2.5px at 55px 125px, #fffbd6 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 125px 15px, rgba(255, 255, 255, 0.6) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 10px 100px, rgba(255, 255, 255, 0.55) 50%, transparent 51%);
+  background-size: 140px 140px;
+}
+:root[data-theme='dark'] .panel::after {
+  background-image:
+    radial-gradient(3px 3px at 40px 60px, #fffbd6 50%, transparent 51%),
+    radial-gradient(2.5px 2.5px at 180px 170px, #ffffff 50%, transparent 51%),
+    radial-gradient(3px 3px at 150px 30px, #dfe8ff 50%, transparent 51%);
+  background-size: 230px 230px;
+  animation: panel-twinkle 3.5s ease-in-out infinite alternate;
 }

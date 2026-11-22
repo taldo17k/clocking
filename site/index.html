@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;800&display=swap">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/scene.css">
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
@@ -27,35 +28,61 @@
     <section class="hero">
       <h1 class="hero-title"><span class="highlight-pink" data-i18n="heroTitle">How to read the 24-hour clock</span></h1>
       <p class="hero-lead" data-i18n="heroLead">A day has 24 hours. Let's learn to read every one of them.</p>
+      <div class="controls">
+        <button type="button" class="btn" id="btn-now"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span data-i18n="nowButton">Now</span></button>
+        <button type="button" class="btn btn-accent" id="btn-play" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span data-i18n="playButton">Play the day</span></button>
+      </div>
+      <p class="visually-hidden" id="live" aria-live="polite"></p>
+    </section>
 
+    <section class="panel card board-panel" aria-labelledby="pairs-title">
+      <h2 id="pairs-title"><span class="highlight-green" data-i18n="pairsTitle">Hour pairs</span></h2>
+      <p class="muted" data-i18n="pairsHint">The two hours in each row are said the same way.</p>
+      <div class="pairs-board" id="pairs" role="group" aria-labelledby="pairs-title"></div>
+    </section>
+
+    <section class="panel card dial-panel" aria-labelledby="dial-title">
+      <h2 id="dial-title"><span class="highlight-green" data-i18n="dialTitle">The two-ring clock</span></h2>
+      <p class="muted" data-i18n="dialHint">Drag the hands or tap a number.</p>
+      <div class="dial" id="dial">
+        <ul class="dial-legend">
+          <li class="legend-inner" data-i18n="legendInner">Inner ring: 00–11</li>
+          <li class="legend-outer" data-i18n="legendOuter">Outer ring: 12–23</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="stage-section" aria-labelledby="stage-title">
+      <h2 id="stage-title"><span class="highlight-green" data-i18n="stageTitle">The digital clock</span></h2>
+      <p class="muted" data-i18n="stageHint">Change the hours and minutes.</p>
       <div class="stage" id="stage" data-phase="morning">
-        <div class="sky" aria-hidden="true">
-          <div class="stars"></div>
-          <div class="orb"></div>
-          <div class="ground"></div>
-        </div>
-        <p class="phase-label" aria-live="polite">
-          <span id="phase-name">Morning</span>
-        </p>
+        <p class="phase-label" id="phase-name">Morning</p>
 
         <div class="clock-card card">
-          <div class="digital" role="img" id="digital" aria-label="08:15">
-            <span class="slot" data-part="h1">0</span><span class="slot" data-part="h2">8</span>
-            <span class="colon">:</span>
-            <span class="slot" data-part="m1">1</span><span class="slot" data-part="m2">5</span>
+          <div class="digital" id="digital">
+            <div class="spin" data-unit="hours">
+              <button type="button" class="spin-btn" data-dir="1" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
+              <div class="digits" role="spinbutton" tabindex="0" aria-valuemin="0" aria-valuemax="23" aria-label="Hours" data-i18n-label="hoursGroup">
+                <span class="slot">0</span><span class="slot">8</span>
+              </div>
+              <button type="button" class="spin-btn" data-dir="-1" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+            </div>
+            <span class="colon" aria-hidden="true">:</span>
+            <div class="spin" data-unit="minutes">
+              <button type="button" class="spin-btn" data-dir="1" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
+              <div class="digits" role="spinbutton" tabindex="0" aria-valuemin="0" aria-valuemax="59" aria-label="Minutes" data-i18n-label="minutesGroup">
+                <span class="slot">1</span><span class="slot">5</span>
+              </div>
+              <button type="button" class="spin-btn" data-dir="-1" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+            </div>
           </div>
           <div class="digital-labels">
             <span data-i18n="hoursLabel">hours (00–23)</span>
             <span data-i18n="minutesLabel">minutes (00–59)</span>
           </div>
+          <p class="say"><span id="say-text">It's eight fifteen in the morning.</span> <span class="ampm" id="ampm">8:15 AM</span></p>
         </div>
       </div>
-    </section>
-
-    <section class="phases" aria-labelledby="phases-title">
-      <h2 id="phases-title"><span class="highlight-green" data-i18n="phasesTitle">Parts of the day</span></h2>
-      <p class="muted" data-i18n="phasesHint">Tap a part of the day to see its sky.</p>
-      <ul class="phase-list" id="phase-list"></ul>
     </section>
   </main>
 
