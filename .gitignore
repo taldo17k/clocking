@@ -1,0 +1,39 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node (only used for running tests; no build step)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.npm/
+
+# Environment & secrets
+.env
+.env.*
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Logs, temp & coverage
+*.log
+tmp/
+.cache/
+coverage/
+
+# Lighthouse / local test reports
+lighthouse-report*
+*.report.html

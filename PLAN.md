@@ -1,0 +1,226 @@
+# Clocking: Plan for an Interactive 24-Hour Clock Teaching Site
+
+## Goal
+
+Turn the hand-made teaching page (`documents/24hr-clock-example.jpeg`, transcribed in `documents/CONTENT.md`) into a simple, polished, interactive website that teaches how to read the 24-hour clock. The site will:
+
+- be in **English** for v1, with the structure ready for Hebrew (RTL) later
+- be hosted on **GitHub Pages** as a static site, with no backend
+- **track visitors** in a privacy-friendly way
+
+## What the original teaches (summary of `documents/CONTENT.md`)
+
+1. **Hour pairs:** 00=12, 01=13 … 11=23. Both hours in a pair are *said* the same way, and the rule is +12 or −12.
+2. **Parts of the day:** each range of hours has its own sky scene: Night (00–05), Sunrise (06), Morning (07–11), Midday (12–14), Afternoon (15–17), Sunset (18), Evening (19–21), Night (22–23). The original groups 12–15 as midday; the English version moves 15 to the afternoon.
+3. **Clock structure:** `HH:MM` means hours (00–23) : minutes (00–59).
+4. **How to say it:** `08:15` → "eight fifteen in the morning", and `22:39` → "ten thirty-nine at night".
+
+The site keeps this order and this method. Its core is a **digital `HH:MM` clock**, the **pairs table**, and a **sky scene** that changes with the hour. Underneath sits a **two-ring analog clock**: an inner ring 1–12 and an outer ring 13–24 around it. It shows why the pairs are "the same": both hours in a pair sit at the same spot on the dial.
+
+## Guiding Decisions
+
+| Topic | Decision | Why |
+|---|---|---|
+| Stack | Plain HTML + CSS + vanilla JavaScript (ES modules), no build step | Simplest thing that works on GitHub Pages |
+| Visuals | Sky scenes drawn as inline SVG/CSS in the colorful, hand-drawn spirit of the original | Sharp at any size and easy to animate between parts of the day |
+| Text | All UI strings in one `strings/en.js` | Adding Hebrew later is mostly translation plus `dir="rtl"` |
+| AM/PM | Part-of-day words come first, as in the original. AM/PM is shown as a small secondary hint | Stays faithful to the original while still helping English speakers |
+| Analytics | **GoatCounter** (free, cookieless, no consent banner needed). Fallback: Cloudflare Web Analytics | Works with one script tag on a static site |
+| Deployment | A GitHub Actions workflow deploys to Pages on every push to `main` | Repeatable, no manual steps |
+
+---
+
+## Step 0: Reference material and content outline ✅ done
+
+**Tasks**
+- Original image is in `documents/24hr-clock-example.jpeg`.
+- Content is transcribed and translated into `documents/CONTENT.md`; the margins are ignored.
+- The author has confirmed these choices: "Sunrise" (06) and "Sunset" (18), Midday 12–14 and Afternoon 15–17, AM/PM as a secondary hint, and the two-ring analog clock.
+
+**Success criteria**
+- [ ] The reference image is committed and viewable in the repo.
+- [x] `documents/CONTENT.md` lists every concept from the drawing, in English, in teaching order.
+- [x] The author has confirmed the open interpretations.
+
+---
+
+## Step 1: Project skeleton and GitHub Pages deployment
+
+**Tasks**
+- Create the structure:
+  ```
+  index.html
+  css/styles.css
+  js/main.js
+  js/time.js         # pure functions: pair(h), partOfDay(h), spoken(h, m)
+  js/clock.js        # digital HH:MM clock component
+  js/dial.js         # two-ring analog clock (SVG)
+  js/scene.js        # sky scene renderer
+  js/lessons.js      # lesson navigation
+  js/quiz.js         # practice mode
+  strings/en.js      # all UI text
+  assets/            # favicon, og-image
+  tests/time.test.js
+  .github/workflows/pages.yml
+  ```
+- Add a minimal placeholder page.
+- Configure the deploy workflow and enable Pages in the repo settings.
+
+**Success criteria**
+- [ ] The page loads locally (`python3 -m http.server`) with no console errors.
+- [ ] Pushing to `main` triggers the workflow, and it finishes green.
+- [ ] The site is live at `https://<user>.github.io/clocking/`.
+- [ ] All asset paths are relative, so nothing 404s under the `/clocking/` sub-path.
+
+---
+
+## Step 2: Visual design system
+
+**Tasks**
+- Create a playful, warm look that echoes the marker drawing: rounded shapes, bold colors, and a friendly handwritten-style display font with a clean body font.
+- Build one color palette for each part of the day, taken from the drawing: black, moon-yellow and stars (night); pink hills and purple (sunrise); light blue and sun (morning); bright blue and big sun (midday); orange and purple stripes (sunset); dark sky and moon (evening).
+- Define CSS custom properties, and make the layout mobile-first and responsive.
+
+**Success criteria**
+- [ ] All colors and sizes come from CSS variables in one place.
+- [ ] Looks good at 360px, 768px and 1440px widths, with no horizontal scroll.
+- [ ] Text contrast meets WCAG AA over every sky scene.
+- [ ] Lighthouse Accessibility score is 95 or higher.
+
+---
+
+## Step 3: Core time logic (pure functions plus tests)
+
+**Tasks**
+- `pair(h)` returns the partner hour (h±12).
+- `spokenHour(h)` returns 1–12, where both 00 and 12 give "twelve".
+- `partOfDay(h)` returns one of night (00–05, 22–23), sunrise (06), morning (07–11), midday (12–14), afternoon (15–17), sunset (18) or evening (19–21).
+- `spoken(h, m)` returns English text, for example "eight fifteen in the morning", "two forty-five in the afternoon" or "ten thirty-nine at night".
+- `handAngles(h, m)` returns the hour-hand and minute-hand angles for the analog dial, plus which ring is active (inner for 00–11, outer for 12–23).
+
+**Success criteria**
+- [ ] Unit tests (`node --test`) cover all 24 hours of `pair`, `spokenHour`, `partOfDay` and `handAngles`.
+- [ ] Boundaries are correct: 14 is midday, 15 is afternoon, 18 is sunset, and 22 is night.
+- [ ] Both hours in a pair produce the same hour-hand angle, for example 03 and 15.
+- [ ] The two examples from the drawing produce the expected sentences: `08:15` and `22:39`.
+- [ ] Edge cases pass: `00:00`, `06:00`, `12:00`, `18:00`, `23:59`, and minutes `00`, `05` ("oh five") and `30`.
+
+---
+
+## Step 4: The interactive explorer (main screen)
+
+This is the drawing brought to life on one screen.
+
+**Tasks**
+- **Digital clock `HH : MM`** with up and down controls (plus swipe, scroll and keyboard) for hours and for minutes. Hours are labeled "hours (00–23)" and minutes "minutes (00–59)", as in the "structure of the clock" section of the drawing.
+- **Sky scene** behind or beside the clock. It changes smoothly to match the current part of the day (moon and stars, rising sun, full sun, sunset, and so on) and shows the part-of-day name.
+- **Pairs table**, 00=12 … 11=23. The current hour's row lights up, and a curved arrow connects the pair, as in the original.
+- **"How we say it"** line, for example "It's ten thirty-nine at night". It also shows a small AM/PM hint.
+- **"Now"** button for the current time, and a **"Play the day"** button that runs through 00:00 → 23:59 so the scenes and the highlighted row change.
+- **Two-ring analog clock**, placed underneath the digital clock, scene and table:
+  - The **inner ring** shows 1–12 with 12 at the top. The **outer ring** around it shows 13–24, with 24 (00) at the top.
+  - Hour and minute hands follow the time that is set. The active ring lights up: inner for 00–11 and outer for 12–23. The number the hour hand points to is highlighted on both rings, which shows the pair visually.
+  - Dragging the hands (mouse or touch) or tapping a number on either ring sets the time. Everything above it (digital clock, scene, table, sentence) stays in sync.
+  - The dial's background tint follows the current part of the day.
+
+**Success criteria**
+- [ ] Changing the hour from 23 to 00 wraps correctly, and minutes 59 → 00 increase the hour.
+- [ ] The scene, the highlighted row and the spoken sentence always agree with the hours shown.
+- [ ] Works with mouse, touch and keyboard. Screen readers hear the time and the spoken sentence (`aria-live`).
+- [ ] "Play the day" goes through all 8 scenes in order: night → sunrise → morning → midday → afternoon → sunset → evening → night.
+- [ ] The analog dial and the digital clock always show the same time, whichever one was changed.
+- [ ] Dragging the hour hand clockwise past the top moves from 11 to 12 (onto the outer ring) and from 23 to 00 (back to the inner ring).
+- [ ] Tapping 15 on the outer ring and tapping 3 on the inner ring point the hand at the same spot, but produce 15:xx and 03:xx respectively.
+- [ ] The dial is readable at 360px width, with ring numbers at least 14px.
+
+---
+
+## Step 5: Guided lessons
+
+**Tasks**
+- Build four short steps that follow the order of the original page:
+  1. **A day has 24 hours.** Introduce the parts of the day with the sky scenes.
+  2. **Hour pairs.** Show the table and the "+12" rule; the pairs are said the same way, and 00 is said as "twelve". Then show the two-ring dial: each pair sits at the same spot, one on the inner ring and one on the outer ring.
+  3. **Structure of the clock.** Explain HH:MM, hours 00–23 and minutes 00–59.
+  4. **Reading a time aloud.** Walk through the two examples from the drawing step by step: `08:15` and `22:39`.
+- Each step drives the explorer, setting the time and highlighting the relevant part.
+- Add Next and Back navigation and a progress indicator.
+
+**Success criteria**
+- [ ] Every concept in `documents/CONTENT.md` appears in a lesson.
+- [ ] Each step's text can be read in under 1 minute.
+- [ ] The examples from the drawing (`08:15`, `22:39`) appear exactly as in the original.
+- [ ] Progress is remembered in `localStorage` (with a graceful fallback if storage is blocked).
+
+---
+
+## Step 6: Practice and quiz mode
+
+**Tasks**
+- Question types, based on the drawing:
+  - **Find the pair:** "17 is the same as …?" → 5
+  - **Part of the day:** "What part of the day is 20:00?" → Evening (the scene is shown after the answer)
+  - **Say it:** "How do we say 15:45?" → choose "three forty-five in the afternoon"
+  - **Set the clock:** "Set the clock to ten thirty-nine at night" → 22:39, using the digital controls or the analog dial
+- Give instant feedback that explains the rule, for example "22 − 12 = 10, and 22 is at night."
+- Show a score and streak counter, with a small celebration on a good streak.
+
+**Success criteria**
+- [ ] Questions are randomly generated, and none repeats within a 10-question round.
+- [ ] Every wrong answer shows the correct answer and the rule behind it.
+- [ ] Every question type is checked by the functions from Step 3, so there is one source of truth.
+- [ ] A full round can be completed on a phone using only touch.
+
+---
+
+## Step 7: Visitor tracking
+
+**Tasks**
+- Create a GoatCounter site (for example, `clocking.goatcounter.com`) and add its script tag.
+- Track key events: lesson completed, quiz finished, and score band.
+- Optionally make the dashboard public and link it from the README.
+- Add a footer note: "Anonymous, cookie-free visit counting."
+
+**Success criteria**
+- [ ] A visit to the live site appears on the GoatCounter dashboard within a few minutes.
+- [ ] Custom events appear in the dashboard.
+- [ ] No cookies are set (checked in DevTools → Application → Cookies).
+- [ ] Analytics does not run on `localhost`.
+- [ ] If an ad-blocker blocks analytics, the site still works normally.
+
+---
+
+## Step 8: Polish, SEO and sharing
+
+**Tasks**
+- Add a favicon, title, meta description, and Open Graph and Twitter card tags. The preview image can be a sky-scene collage.
+- Respect `prefers-reduced-motion`: scene changes fade instead of animating.
+- Update `README.md` with a description, the live link, a screenshot, how to run it locally, and credit to the original hand-made page.
+
+**Success criteria**
+- [ ] Sharing the link in WhatsApp or Slack shows a proper preview card.
+- [ ] Lighthouse scores: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO ≥ 95.
+- [ ] Total page weight is under 300 KB (excluding fonts).
+- [ ] Animations are reduced when the OS "reduce motion" setting is on.
+
+---
+
+## Step 9 (future): Hebrew version
+
+**Tasks**
+- Add `strings/he.js` with the original wording (לילה, בוקר, צהריים, אחר הצהריים, ערב, and the example sentences), and a language toggle (EN / עב).
+- Switch to `dir="rtl"`. The `HH:MM` display stays left-to-right.
+- Add Hebrew spoken-time logic, which differs from English, for example "שמונה וחמש עשרה דקות".
+
+**Success criteria**
+- [ ] Switching language changes all text with no reload, and the choice is remembered.
+- [ ] The RTL layout has no overlapping or misaligned elements, and the clock digits stay left-to-right.
+- [ ] The Hebrew lesson text matches the original page word for word for both examples.
+
+---
+
+## Definition of Done (v1 = Steps 0–8)
+
+- The site is live on GitHub Pages and updates automatically on every push to `main`.
+- A learner can explore the digital clock and the two-ring dial, go through the four lessons and finish a quiz, on desktop or phone.
+- Visits are counted anonymously and can be viewed on the analytics dashboard.
