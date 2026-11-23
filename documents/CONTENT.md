@@ -85,4 +85,4 @@ Example 2 shows the method in full. To read **22**, find its pair (**10**), say 
 ## Notes for the English version
 
 - The original does **not** use AM/PM. It uses part-of-day words instead. The English site will keep that approach as the main method, and will show AM/PM as a secondary hint, since English speakers will expect it.
-- Natural English phrasing: "It's eight fifteen in the morning" and "It's ten thirty-nine at night". The more literal "eight and fifteen minutes" can be shown as a step toward it.
+- Natural English phrasing: "It's eight fifteen in the morning" and "It's ten thirty-nine at night". The more literal "eight and fifteen minutes" can be shown as a step toward it. (A "quarter past / ten to" style was tried and rejected: simply saying the minutes is clearer.)

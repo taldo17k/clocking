@@ -2,8 +2,9 @@
   "name": "clocking",
   "private": true,
   "type": "module",
-  "description": "Interactive site for learning the 24-hour clock. No build step; package.json only runs the tests.",
+  "description": "Interactive site for learning the 24-hour clock. No build step; package.json runs the tests and a local preview server.",
   "scripts": {
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "serve": "node scripts/serve.mjs"
   }
 }

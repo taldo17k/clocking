@@ -8,6 +8,7 @@ import { initDial } from './dial.js';
 import { initLessons } from './lessons.js';
 import { initQuiz } from './quiz.js';
 import { initAnalytics } from './analytics.js';
+import { initName } from './name.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -21,6 +22,10 @@ function applyStrings() {
   document.querySelectorAll('[data-i18n-label]').forEach((el) => {
     const text = strings[el.dataset.i18nLabel];
     if (typeof text === 'string') el.setAttribute('aria-label', text);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+    const text = strings[el.dataset.i18nPlaceholder];
+    if (typeof text === 'string') el.placeholder = text;
   });
 }
 
@@ -92,6 +97,7 @@ initSentence();
 initControls();
 initPairs($('pairs'), strings);
 initDial($('dial'), strings);
+initName(strings);
 initLessons(strings);
 initQuiz(strings);
 initAnalytics();

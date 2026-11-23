@@ -198,10 +198,11 @@ All the scenes are animated (`js/scene.js`, `css/scene.css`): layered hills, a s
 - Optionally make the dashboard public and link it from the README.
 - Add a footer note: "Anonymous, cookie-free visit counting."
 - *As built:* `js/analytics.js` loads GoatCounter (`taldo17k.goatcounter.com`) only on `taldo17k.github.io`. It counts the events `lesson-finished`, `quiz-finished` and `quiz-score-<band>`. The first two criteria are checked once the site is pushed.
+- *Extra:* the first time someone starts a lesson or quiz, the site asks for their first name. It can be skipped, and it can be changed later from the greeting. On each new visit, the first lesson or quiz asks "Welcome back! Are you Dana?", with "Yes, I'm Dana" or "I'm someone else"; if no name was given last time, it asks for one again. The name is used only on the page (a greeting, the lesson's first step, quiz messages), stays in that browser, and is never sent to the visitor counter. The site is always dark; the light theme is kept in the CSS but turned off with `data-theme="dark"` on `<html>`.
 
 **Success criteria**
-- [ ] A visit to the live site appears on the GoatCounter dashboard within a few minutes.
-- [ ] Custom events appear in the dashboard.
+- [x] A visit to the live site appears on the GoatCounter dashboard within a few minutes.
+- [x] Custom events appear in the dashboard.
 - [x] No cookies are set (checked in DevTools → Application → Cookies).
 - [x] Analytics does not run on `localhost`.
 - [x] If an ad-blocker blocks analytics, the site still works normally.

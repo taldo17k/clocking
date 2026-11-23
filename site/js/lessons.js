@@ -3,6 +3,7 @@
 // golden spotlight. The text lives in strings/en.js; the example breakdowns
 // are built from time.js so they always match the rest of the page.
 import { setTime, subscribe } from './state.js';
+import { ensureName, getName } from './name.js';
 import { numberWords, pad, pair, partOfDay, spoken, spokenHour } from './time.js';
 
 const STORAGE_KEY = 'clocking.lesson';
@@ -108,7 +109,7 @@ export function initLessons(strings) {
 
     progressText.textContent = L.progress(step + 1, STEPS.length);
     title.textContent = text.title;
-    richText(body, text.body);
+    richText(body, (step === 0 && getName() ? strings.name.lessonHi(getName()) : '') + text.body);
     [...dots.children].forEach((d, i) => {
       d.classList.toggle('is-done', i < step);
       d.classList.toggle('is-current', i === step);
@@ -173,7 +174,8 @@ export function initLessons(strings) {
     updateStartButton();
   };
 
-  const openLesson = () => {
+  const openLesson = async () => {
+    await ensureName();
     document.dispatchEvent(new CustomEvent('sheet:open', { detail: 'lesson' }));
     if (progress.done) { progress = { step: 0, done: false }; step = 0; }
     open = true;

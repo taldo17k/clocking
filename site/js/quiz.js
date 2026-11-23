@@ -7,6 +7,7 @@ import {
 } from './quiz-core.js';
 import { format, pad } from './time.js';
 import { play, isMuted, setMuted } from './sound.js';
+import { ensureName, getName } from './name.js';
 
 const STORAGE_KEY = 'clocking.quiz';
 const STREAK_CELEBRATIONS = new Set([3, 5, 8, 10]);
@@ -127,7 +128,7 @@ export function initQuiz(strings) {
     if (correct && STREAK_CELEBRATIONS.has(streak)) {
       const chip = document.createElement('span');
       chip.className = 'quiz-streak-chip';
-      chip.textContent = Q.inARow(streak);
+      chip.textContent = getName() ? strings.name.inARow(streak, getName()) : Q.inARow(streak);
       feedback.append(' ', chip);
       celebrate();
       play('streak');
@@ -222,7 +223,8 @@ export function initQuiz(strings) {
     big.textContent = `${score} / ${round.length}`;
     prompt.replaceChildren(big);
     hint.hidden = false;
-    hint.textContent = Q.end[scoreBand(score, round.length)];
+    const band = scoreBand(score, round.length);
+    hint.textContent = getName() ? strings.name.end[band](getName()) : Q.end[band];
     optionsBox.replaceChildren();
     optionsBox.hidden = true;
     feedback.hidden = false;
@@ -257,7 +259,8 @@ export function initQuiz(strings) {
     else showEnd();
   });
 
-  const openQuiz = () => {
+  const openQuiz = async () => {
+    await ensureName();
     document.dispatchEvent(new CustomEvent('sheet:open', { detail: 'quiz' }));
     open = true;
     card.hidden = false;
