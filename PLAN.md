@@ -87,8 +87,8 @@ The site keeps this order and this method. Its core is a **digital `HH:MM` clock
 **Success criteria**
 - [x] All colors and sizes come from CSS variables in one place.
 - [x] Looks good at 360px, 768px and 1440px widths, with no horizontal scroll.
-- [ ] Text contrast meets WCAG AA over every sky scene.
-- [ ] Lighthouse Accessibility score is 95 or higher.
+- [x] Text contrast meets WCAG AA over every sky scene.
+- [x] Lighthouse Accessibility score is 95 or higher.
 
 ---
 
@@ -215,12 +215,20 @@ All the scenes are animated (`js/scene.js`, `css/scene.css`): layered hills, a s
 - Add a favicon, title, meta description, and Open Graph and Twitter card tags. The preview image can be a sky-scene collage.
 - Respect `prefers-reduced-motion`: scene changes fade instead of animating.
 - Update `README.md` with a description, the live link, a screenshot, how to run it locally, and credit to the original hand-made page.
+- *As built:*
+  - **Preview card:** `assets/og-image.jpg` (1200×630, 95 KB) is made from the real sky scenes, with Open Graph and Twitter tags and a canonical URL.
+  - **Phone speed:** the slow drift of the panel backgrounds repainted every panel on every frame. It now moves the layer instead, which the graphics card handles; main-thread work fell from 2.6 s to 0.26 s per 3 s. Google Fonts no longer block the first paint.
+  - **Lighthouse:** on the live site before the fix, mobile was 61/100/100/100 and desktop 97/100/100/100. Locally after the fix, mobile is 99/100/100/100.
+  - **Contrast:** the worst case is the highlighted scene label at night, 5.28:1.
+  - **Weight:** about 68 KB without fonts, before compression.
+  - **Reduce motion:** about 540 animations normally, none with the setting on.
+  - **Local preview:** `npm run serve`, which tells the browser to check for new files every time.
 
 **Success criteria**
 - [ ] Sharing the link in WhatsApp or Slack shows a proper preview card.
 - [ ] Lighthouse scores: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO ≥ 95.
-- [ ] Total page weight is under 300 KB (excluding fonts).
-- [ ] Animations are reduced when the OS "reduce motion" setting is on.
+- [x] Total page weight is under 300 KB (excluding fonts).
+- [x] Animations are reduced when the OS "reduce motion" setting is on.
 
 ---
 
