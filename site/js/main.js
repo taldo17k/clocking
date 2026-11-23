@@ -5,6 +5,9 @@ import { initDigital } from './clock.js';
 import { initStageScene } from './scene.js';
 import { initPairs } from './pairs.js';
 import { initDial } from './dial.js';
+import { initLessons } from './lessons.js';
+import { initQuiz } from './quiz.js';
+import { initAnalytics } from './analytics.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -89,3 +92,6 @@ initSentence();
 initControls();
 initPairs($('pairs'), strings);
 initDial($('dial'), strings);
+initLessons(strings);
+initQuiz(strings);
+initAnalytics();

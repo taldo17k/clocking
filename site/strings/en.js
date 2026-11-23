@@ -29,6 +29,100 @@ export default {
   stageTitle: 'The digital clock',
   stageHint: 'Change the hours and minutes with the arrows, by swiping up and down, or with the keyboard.',
   footerCredit: 'Based on a hand-drawn lesson.',
+  footerPrivacy: 'Anonymous, cookie-free visit counting.',
+  quizOpen: 'Practice',
+  quiz: {
+    open: 'Practice',
+    close: 'Close practice',
+    progress: (n, total) => `Question ${n} of ${total}`,
+    score: (n) => `Score ${n}`,
+    streak: (n) => `Streak ${n}`,
+    // **bold** marks words to emphasise.
+    prompts: {
+      pair: (hh) => `Which hour is said the same way as **${hh}**?`,
+      part: (time) => `What part of the day is **${time}**?`,
+      say: (time) => `How do we say **${time}**?`,
+      setDigital: (words) => `Set the **digital clock** to **${words}**.`,
+      setDial: (words) => `Set the **two-ring clock** to **${words}**.`,
+    },
+    setHint: {
+      digital: 'Use the arrows, swipe the numbers up or down, or use the keyboard. Then press Check.',
+      dial: 'Drag the hands or tap a number on the right ring. Then press Check.',
+    },
+    soundOn: 'Sound on',
+    soundOff: 'Sound off',
+    check: 'Check',
+    next: 'Next question',
+    results: 'See my score',
+    again: 'Play again',
+    correct: 'Correct!',
+    wrong: 'Not quite.',
+    youSet: (time) => `You set ${time}.`,
+    inARow: (n) => `${n} in a row!`,
+    end: {
+      title: 'Round complete',
+      best: (best, total) => `Best score: ${best} / ${total}`,
+      newBest: 'New best score!',
+      perfect: "Perfect! You're a 24-hour clock pro.",
+      great: 'Great job! Almost perfect.',
+      good: 'Good start. Play again to beat your score.',
+      practice: 'Keep practising. The lesson can help too.',
+    },
+    explain: {
+      pairUp: (hh, partner) => `${hh} + 12 = ${partner}. They are said the same way.`,
+      pairDown: (hh, partner) => `${hh} − 12 = ${partner}. They are said the same way.`,
+      part: (time, name, range) => `${time} belongs to ${name} (${range}).`,
+      minus: (hh, small, word) => `${hh} − 12 = ${small}, said "${word}"`,
+      midnight: '00 is said "twelve"',
+      same: (hh, word) => `${hh} is said "${word}"`,
+      say: (hourRule, mm, minuteWords, phrase) => `${hourRule}; ${mm} is "${minuteWords}"; and it's ${phrase}.`,
+      plus: (small, hh) => `${small} + 12 = ${hh}`,
+      set: (word, phrase, answer, plus) => (plus
+        ? `"${word}" ${phrase} is in the second half of the day: ${plus}. So it's ${answer}.`
+        : `"${word}" ${phrase} is in the first half of the day, so it's ${answer}.`),
+    },
+  },
+  lesson: {
+    start: 'Start the lesson',
+    continue: (n, total) => `Continue the lesson (${n}/${total})`,
+    replay: 'Replay the lesson',
+    progress: (n, total) => `Lesson ${n} of ${total}`,
+    back: 'Back',
+    next: 'Next',
+    finish: 'Finish',
+    close: 'Close the lesson',
+    // **bold** marks words to emphasise.
+    steps: {
+      day: {
+        title: 'A day has 24 hours',
+        body: 'From midnight to midnight the clock counts **24 hours**, from **00** to **23**. Each part of the day has its own sky: night, sunrise, morning, midday, afternoon, sunset and evening. Watch the pictures light up as the hours go by.',
+      },
+      pairs: {
+        title: 'Hour pairs',
+        body: 'Every hour from **00 to 11** has a partner **12 hours later**: 03 and 15, 08 and 20, 10 and 22. To find the partner, **add 12** or **take away 12**. Both hours in a pair are **said the same way**: 15 is "three" and 22 is "ten". 00 and 12 are both "twelve".',
+      },
+      rings: {
+        title: 'Two rings, one spot',
+        body: 'On the two-ring clock the **inner ring** holds 00–11 and the **outer ring** holds 12–23. Both hours of a pair sit in **the same spot**, so the hour hand points at both of them. The golden ring shows which half of the day it is.',
+      },
+      structure: {
+        title: 'Hours : minutes',
+        body: 'A 24-hour time has two parts. Before the colon are the **hours**, from 00 to 23. After the colon are the **minutes**, from 00 to 59. So **14:35** means 14 hours and 35 minutes.',
+      },
+      example1: {
+        title: 'Example 1: 08:15',
+        body: "Let's read **08:15** one part at a time:",
+      },
+      example2: {
+        title: 'Example 2: 22:39',
+        body: '**22** is 12 or more, so first find its pair, then read it the same way:',
+      },
+    },
+    breakdown: {
+      pair: (hh, partner) => `${hh} − 12 = ${partner}`,
+      midnight: '00 is said like 12',
+    },
+  },
   phases: {
     night: 'Night',
     sunrise: 'Sunrise',

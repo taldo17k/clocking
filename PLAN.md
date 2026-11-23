@@ -159,12 +159,13 @@ All the scenes are animated (`js/scene.js`, `css/scene.css`): layered hills, a s
   4. **Reading a time aloud.** Walk through the two examples from the drawing step by step: `08:15` and `22:39`.
 - Each step drives the explorer, setting the time and highlighting the relevant part.
 - Add Next and Back navigation and a progress indicator.
+- *As built:* six short cards in a floating lesson card: a day has 24 hours, hour pairs, two rings and one spot, hours : minutes, example 08:15 and example 22:39. Each card sets the clock, scrolls to its widget and gives it a golden spotlight; the examples are broken down step by step (22 → 22 − 12 = 10 → "ten").
 
 **Success criteria**
-- [ ] Every concept in `documents/CONTENT.md` appears in a lesson.
-- [ ] Each step's text can be read in under 1 minute.
-- [ ] The examples from the drawing (`08:15`, `22:39`) appear exactly as in the original.
-- [ ] Progress is remembered in `localStorage` (with a graceful fallback if storage is blocked).
+- [x] Every concept in `documents/CONTENT.md` appears in a lesson.
+- [x] Each step's text can be read in under 1 minute.
+- [x] The examples from the drawing (`08:15`, `22:39`) appear exactly as in the original.
+- [x] Progress is remembered in `localStorage` (with a graceful fallback if storage is blocked).
 
 ---
 
@@ -178,12 +179,14 @@ All the scenes are animated (`js/scene.js`, `css/scene.css`): layered hills, a s
   - **Set the clock:** "Set the clock to ten thirty-nine at night" → 22:39, using the digital controls or the analog dial
 - Give instant feedback that explains the rule, for example "22 − 12 = 10, and 22 is at night."
 - Show a score and streak counter, with a small celebration on a good streak.
+- *As built:* a "Practice" button opens a floating quiz card (same style as the lesson card). Each round has 10 questions: 2 pair, 2 part of day, 3 say it, 3 set the clock. Every answer shows the rule, the page jumps to the question's time, and a burst of suns and stars marks 3, 5, 8 and 10 in a row. The end screen shows the score and the best score. The logic is in `js/quiz-core.js`, with unit tests in `tests/quiz.test.js`.
+- *Revised after review:* set-the-clock questions name one clock ("Set the **digital clock** to…" or "Set the **two-ring clock** to…"), and each round uses both. The named clock scrolls to the top of the screen, above the quiz card, and only it glows. Correct and wrong answers play short sounds made with the Web Audio API, and a streak adds a sparkle; a speaker button mutes them, and the setting is remembered.
 
 **Success criteria**
-- [ ] Questions are randomly generated, and none repeats within a 10-question round.
-- [ ] Every wrong answer shows the correct answer and the rule behind it.
-- [ ] Every question type is checked by the functions from Step 3, so there is one source of truth.
-- [ ] A full round can be completed on a phone using only touch.
+- [x] Questions are randomly generated, and none repeats within a 10-question round.
+- [x] Every wrong answer shows the correct answer and the rule behind it.
+- [x] Every question type is checked by the functions from Step 3, so there is one source of truth.
+- [x] A full round can be completed on a phone using only touch.
 
 ---
 
@@ -194,13 +197,14 @@ All the scenes are animated (`js/scene.js`, `css/scene.css`): layered hills, a s
 - Track key events: lesson completed, quiz finished, and score band.
 - Optionally make the dashboard public and link it from the README.
 - Add a footer note: "Anonymous, cookie-free visit counting."
+- *As built:* `js/analytics.js` loads GoatCounter (`taldo17k.goatcounter.com`) only on `taldo17k.github.io`. It counts the events `lesson-finished`, `quiz-finished` and `quiz-score-<band>`. The first two criteria are checked once the site is pushed.
 
 **Success criteria**
 - [ ] A visit to the live site appears on the GoatCounter dashboard within a few minutes.
 - [ ] Custom events appear in the dashboard.
-- [ ] No cookies are set (checked in DevTools → Application → Cookies).
-- [ ] Analytics does not run on `localhost`.
-- [ ] If an ad-blocker blocks analytics, the site still works normally.
+- [x] No cookies are set (checked in DevTools → Application → Cookies).
+- [x] Analytics does not run on `localhost`.
+- [x] If an ad-blocker blocks analytics, the site still works normally.
 
 ---
 
