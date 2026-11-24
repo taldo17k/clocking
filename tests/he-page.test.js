@@ -17,5 +17,5 @@ test('the Hebrew page starts in Hebrew, right-to-left, with a Hebrew preview', (
   assert.match(html, /<base href="\.\.\/">/);
   assert.match(html, /og:url" content="https:\/\/taldo17k\.github\.io\/clocking\/he\/"/);
   assert.match(html, /og:image" content="[^"]*og-image-he\.jpg"/);
-  assert.match(html, /data-i18n="heroTitle">איך קוראים שעון של 24 שעות</);
+  assert.ok(html.includes(`data-i18n="heroTitle">${he.heroTitle}<`), 'the Hebrew title is filled in');
 });
