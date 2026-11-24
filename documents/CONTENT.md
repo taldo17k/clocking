@@ -92,3 +92,9 @@ Example 2 shows the method in full. To read **22**, find its pair (**10**), say 
 - The sentences follow the page: "השעה שמונה וחמש עשרה דקות בבוקר" and "השעה עשר ושלושים ותשע דקות בלילה". Whole hours are said without minutes ("השעה שמונה בבוקר"), one minute is "ודקה אחת" and two minutes are "ושתי דקות". Hours and minutes use feminine numbers.
 - Parts of the day: לילה, זריחה (06), בוקר, צהריים (12–14, the same split as English), אחר הצהריים, שקיעה (18), ערב. In sentences: בלילה, בבוקר, בצהריים, אחר הצהריים, בערב.
 - There is no AM/PM hint. The digital clock and the hour pairs board keep the drawing's left-to-right layout.
+
+## Notes for the Chinese version (`/clocking/zh/`, Simplified)
+
+- Sentences start with the part of the day: "现在是上午八点十五分。", "现在是晚上十点三十九分。". Whole hours have no minutes ("上午八点"), minutes under ten take 零 ("八点零五分"), and 2 o'clock is 两点.
+- Said as: 凌晨 (00–05), 早上 (06), 上午 (07–11), 中午 (12–14), 下午 (15–17), 傍晚 (18), 晚上 (19–23). Sky labels: 夜晚, 日出, 上午, 中午, 下午, 日落, 晚上.
+- 00 is said 十二点, like 12, to keep the hour-pairs idea (零点 is also common in everyday speech).

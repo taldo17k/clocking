@@ -3,7 +3,7 @@
 // digital clock, sky, pairs table, sentence and dial always agree.
 import { addMinutes } from './time.js';
 
-// Starts on the visitor's current time (the lesson still uses 08:15 and 22:39).
+// Starts on the visitor's current time (the lesson still uses 8:15 and 22:39).
 const now = new Date();
 let current = { h: now.getHours(), m: now.getMinutes() };
 const listeners = new Set();

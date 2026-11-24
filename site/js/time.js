@@ -16,10 +16,10 @@ function checkMinute(m) {
 /** Two-digit text, e.g. 8 → "08". */
 export const pad = (n) => String(n).padStart(2, '0');
 
-/** "HH:MM", e.g. (8, 15) → "08:15". */
+/** "H:MM", e.g. (8, 15) → "8:15", (22, 5) → "22:05". Hours have no leading zero. */
 export function format(h, m) {
   checkHour(h); checkMinute(m);
-  return `${pad(h)}:${pad(m)}`;
+  return `${h}:${pad(m)}`;
 }
 
 /** The partner hour from the pairs table: 00↔12, 01↔13 … 11↔23. */
@@ -55,16 +55,15 @@ export function addMinutes(h, m, delta) {
 }
 
 /**
- * Angles for the two-ring analog dial, in degrees clockwise from the top.
- * The inner ring holds 00–11 (left column of the pairs table) and the outer
- * ring holds 12–23 (right column), so both hours of a pair share one angle.
+ * Angles for the dial clock, in degrees clockwise from 12 at the top. Both
+ * hours of a pair (8 and 20) point the same way; the sun/moon switch under
+ * the dial tells them apart.
  */
 export function handAngles(h, m) {
   checkHour(h); checkMinute(m);
   return {
     hour: ((h % 12) + m / 60) * 30,
     minute: m * 6,
-    ring: h < 12 ? 'inner' : 'outer',
   };
 }
 
@@ -74,33 +73,60 @@ export function handAngles(h, m) {
 // `lang` of the speech words. The page calls useSpeech() once at start-up.
 
 let currentSpeech = en.speech;
-/** Choose the language used by default (strings.speech from en.js or he.js). */
+/** Choose the language used by default (strings.speech from en.js, he.js or zh.js). */
 export function useSpeech(words) { currentSpeech = words; }
 
 /**
- * A range such as "07–11". On the Hebrew page it is wrapped in invisible
+ * A range such as "7–11". On the Hebrew page it is wrapped in invisible
  * left-to-right isolate marks (U+2066 … U+2069), so right-to-left text doesn't
- * flip it into "11–07" or split it across two lines.
+ * flip it into "11–7" or split it across two lines.
  */
 export function formatRange(from, to) {
-  if (from === to) return pad(from);
-  if (currentSpeech.lang !== 'he') return `${pad(from)}–${pad(to)}`;
+  if (from === to) return String(from);
+  if (currentSpeech.lang !== 'he') return `${from}–${to}`;
   // Word joiners (U+2060) also stop the line from breaking inside the range.
-  return `\u2066${pad(from)}\u2060–\u2060${pad(to)}\u2069`;
+  return `\u2066${from}\u2060–\u2060${to}\u2069`;
 }
 
-/** A number 0–59 in words, e.g. 39 → "thirty-nine" / "שלושים ותשע". */
+/** A number 0–59 in words, e.g. 39 → "thirty-nine" / "שלושים ותשע" / "三十九". */
 export function numberWords(n, words = currentSpeech) {
   if (!Number.isInteger(n) || n < 0 || n > 59) throw new RangeError(`number must be an integer 0–59, got ${n}`);
+  if (words.lang === 'zh') {
+    if (n < 10) return words.ones[n];
+    const tens = Math.floor(n / 10);
+    return `${tens > 1 ? words.ones[tens] : ''}${words.ten}${n % 10 ? words.ones[n % 10] : ''}`;
+  }
   if (n < 20) return words.ones[n];
   const tens = words.tens[Math.floor(n / 10)];
   if (!(n % 10)) return tens;
   return words.lang === 'he' ? `${tens} ו${words.ones[n % 10]}` : `${tens}-${words.ones[n % 10]}`;
 }
 
-/** How the minutes are said on their own, e.g. 15 → "fifteen" / "חמש עשרה דקות". 0 → "o'clock" / "". */
+/**
+ * The hour as a word. Usually the plain number, but some languages say some
+ * hours differently: in Chinese 2 o'clock is 两点, not 二点.
+ */
+export function hourWords(n, words = currentSpeech) {
+  return words.hours?.[n] ?? numberWords(n, words);
+}
+
+/**
+ * The part-of-day words for an hour, e.g. 22 → "at night" / "בלילה" / "晚上".
+ * Chinese says 凌晨 for the small hours (00–05) and 晚上 for 22–23.
+ */
+export function partPhrase(h, words = currentSpeech) {
+  checkHour(h);
+  if (words.earlyNight && h < 6) return words.earlyNight;
+  return words.partPhrase[partOfDay(h)];
+}
+
+/** How the minutes are said on their own, e.g. 15 → "fifteen" / "חמש עשרה דקות" / "十五分". 0 → "o'clock" / "" / "". */
 export function minuteWords(m, words = currentSpeech) {
   checkMinute(m);
+  if (words.lang === 'zh') {
+    if (m === 0) return '';
+    return `${m < 10 ? words.ones[0] : ''}${numberWords(m, words)}${words.minuteUnit}`; // 零五分, 十五分
+  }
   if (words.lang === 'he') {
     if (m === 0) return '';
     if (m === 1) return `${words.minute} ${words.ones[1]}`;      // דקה אחת
@@ -112,15 +138,18 @@ export function minuteWords(m, words = currentSpeech) {
 
 /**
  * Say a time, naming the hour as `hourNumber` (normally spokenHour(h)).
- * English: 08:15 → "eight fifteen in the morning", 08:05 → "eight oh five in the morning",
+ * English: 8:15 → "eight fifteen in the morning", 8:05 → "eight oh five in the morning",
  * 08:00 → "eight o'clock in the morning".
- * Hebrew (as on the hand-made page): 08:15 → "שמונה וחמש עשרה דקות בבוקר",
+ * Hebrew (as on the hand-made page): 8:15 → "שמונה וחמש עשרה דקות בבוקר",
  * 22:39 → "עשר ושלושים ותשע דקות בלילה", 08:00 → "שמונה בבוקר".
+ * Chinese (part of the day first, no spaces): 8:15 → "上午八点十五分",
+ * 22:39 → "晚上十点三十九分", 02:00 → "凌晨两点", 08:05 → "上午八点零五分".
  */
 export function spokenAs(hourNumber, h, m, words = currentSpeech) {
   checkHour(h); checkMinute(m);
-  const hour = numberWords(hourNumber, words);
-  const part = words.partPhrase[partOfDay(h)];
+  const hour = hourWords(hourNumber, words);
+  const part = partPhrase(h, words);
+  if (words.lang === 'zh') return `${part}${hour}${words.hourUnit}${minuteWords(m, words)}`;
   if (words.lang === 'he') return m === 0 ? `${hour} ${part}` : `${hour} ו${minuteWords(m, words)} ${part}`;
   let minutes;
   if (m === 0) minutes = words.oclock;
@@ -137,7 +166,7 @@ export function spoken(h, m, words = currentSpeech) {
 
 /**
  * The literal phrasing from the hand-made page:
- * 08:15 → "eight and fifteen minutes in the morning",
+ * 8:15 → "eight and fifteen minutes in the morning",
  * 22:39 → "ten and thirty-nine minutes at night".
  */
 export function spokenLong(h, m, words = en.speech) {

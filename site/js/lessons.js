@@ -4,26 +4,51 @@
 // are built from time.js so they always match the rest of the page.
 import { setTime, subscribe } from './state.js';
 import { ensureName, getName } from './name.js';
-import { minuteWords, numberWords, pad, pair, partOfDay, spoken, spokenHour } from './time.js';
+import { hourWords, minuteWords, pad, pair, partOfDay, partPhrase, spoken, spokenHour } from './time.js';
 
 const STORAGE_KEY = 'clocking.lesson';
 const CYCLE_MS = 1800;
 
-// Each step: which widget to spotlight, and what the clock does meanwhile.
-// `times` cycles through [h, m] pairs; `hint` highlights part of the digital clock.
+const DEMO_MS = 450;   // one step of a Roni/Mika demonstration
+const DEMO_HOLD = 6;   // how many steps the finished time stays before it replays
+
+/**
+ * A demonstration of setting a clock, as frames of { time, hint }:
+ * the hours move one at a time, then the minutes five at a time, and on the
+ * dial clock the sun/moon switch is pressed last.
+ */
+function demo(via, [h0, m0], [h, m]) {
+  const frames = [{ time: [h0, m0], hint: 'hours' }];
+  const dialHalf = via === 'dial' ? (h >= 12 ? 12 : 0) : 0;
+  const handHour = via === 'dial' ? h % 12 : h;      // the dial sets the hands first
+  let hh = h0;
+  while (hh !== handHour) { hh = (hh + 1) % 24; frames.push({ time: [hh, m0], hint: 'hours' }); }
+  for (let mm = m0; mm !== m;) { mm = (mm + 5) % 60; frames.push({ time: [hh, mm], hint: 'minutes' }); }
+  if (dialHalf && hh < 12) frames.push({ time: [hh + 12, m], hint: 'switch' });
+  const last = frames[frames.length - 1];
+  for (let i = 0; i < DEMO_HOLD; i++) frames.push(last);
+  return frames;
+}
+const loop = (times, hint) => times.map((time, i) => ({ time, hint: hint?.[i % hint.length] }));
+
+// Each step: which widget to spotlight, and what the clock does meanwhile
+// (`frames` of { time: [h, m], hint }, played every `ms`). A hint highlights the
+// hours or minutes of the digital clock, or the dial's sun/moon switch.
 const STEPS = [
-  { id: 'day', target: 'pairs', times: [[0, 0], [6, 0], [8, 0], [12, 0], [15, 0], [18, 0], [20, 0], [22, 0]] },
-  { id: 'pairs', target: 'pairs', times: [[3, 0], [15, 0], [8, 0], [20, 0], [10, 0], [22, 0]] },
-  { id: 'rings', target: 'dial', times: [[3, 0], [15, 0], [9, 0], [21, 0]] },
-  { id: 'structure', target: 'digital', times: [[14, 35]], hint: ['hours', 'minutes'] },
-  { id: 'example1', target: 'digital', times: [[8, 15]], example: [8, 15] },
-  { id: 'example2', target: 'digital', times: [[22, 39]], example: [22, 39] },
+  { id: 'day', target: 'pairs', frames: loop([[0, 0], [6, 0], [8, 0], [12, 0], [15, 0], [18, 0], [20, 0], [22, 0]]) },
+  { id: 'pairs', target: 'pairs', frames: loop([[3, 0], [15, 0], [8, 0], [20, 0], [10, 0], [22, 0]]) },
+  { id: 'digital', target: 'digital', frames: loop([[14, 35], [14, 35]], ['hours', 'minutes']) },
+  { id: 'dial', target: 'dial', frames: loop([[8, 0], [20, 0], [3, 30], [15, 30]], ['switch']) },
+  { id: 'example1', target: 'digital', frames: loop([[8, 15]]), example: [8, 15] },
+  { id: 'example2', target: 'digital', frames: loop([[22, 39]]), example: [22, 39] },
+  { id: 'roni', target: 'digital', frames: demo('digital', [15, 10], [22, 35]), ms: DEMO_MS },
+  { id: 'mika', target: 'dial', frames: demo('dial', [3, 0], [19, 30]), ms: DEMO_MS },
 ];
 
 // What to scroll to, and what gets the golden glow.
 const TARGETS = {
   pairs: { scroll: '.board-panel', glow: '.board-panel' },
-  dial: { scroll: '.dial-panel', glow: '.dial-panel' },
+  dial: { scroll: '#dial', glow: '.dial-panel' },   // the clock and its sun/moon switch
   digital: { scroll: '.stage-section', glow: '.stage' },
 };
 
@@ -50,14 +75,14 @@ function richText(el, text) {
 /** Rows that take a time apart, e.g. 22 → 22 − 12 = 10 → "ten". */
 function breakdown(h, m, strings) {
   const t = strings.lesson.breakdown;
-  const hourWord = numberWords(spokenHour(h));
+  const hourWord = hourWords(spokenHour(h), strings.speech) + (strings.speech.hourUnit ?? ''); // 十 → 十点 in Chinese
   const rows = [];
-  if (h >= 12) rows.push([pad(h), t.pair(pad(h), pad(pair(h))), hourWord]);
-  else if (h === 0) rows.push([pad(h), t.midnight, hourWord]);
-  else rows.push([pad(h), null, hourWord]);
+  if (h >= 12) rows.push([String(h), t.pair(h, pair(h)), hourWord]);
+  else if (h === 0) rows.push([String(h), t.midnight, hourWord]);
+  else rows.push([String(h), null, hourWord]);
   rows.push([pad(m), null, minuteWords(m) || t.noMinutes]);
   const part = partOfDay(h);
-  rows.push([strings.phases[part], null, strings.speech.partPhrase[part]]);
+  rows.push([strings.phases[part], null, partPhrase(h, strings.speech)]);
   return { rows, sentence: strings.sentence(spoken(h, m)) };
 }
 
@@ -97,9 +122,10 @@ export function initLessons(strings) {
   };
 
   const stopCycle = () => { clearInterval(cycle); cycle = null; };
+  const clearHints = () => document.querySelectorAll('.spin.is-hint, .dial-switch.is-hint').forEach((el) => el.classList.remove('is-hint'));
   const clearSpotlight = () => {
     document.querySelectorAll('.is-spotlight').forEach((el) => el.classList.remove('is-spotlight'));
-    document.querySelectorAll('.spin.is-hint').forEach((el) => el.classList.remove('is-hint'));
+    clearHints();
   };
 
   const show = (index, { scroll = true } = {}) => {
@@ -158,16 +184,14 @@ export function initLessons(strings) {
 
     let i = 0;
     const tick = () => {
-      const [h, m] = s.times[i % s.times.length];
+      const { time: [h, m], hint } = s.frames[i % s.frames.length];
       setTime(h, m, 'lesson');
-      if (s.hint) {
-        const part = s.hint[i % s.hint.length];
-        document.querySelectorAll('.spin').forEach((el) => el.classList.toggle('is-hint', el.dataset.unit === part));
-      }
+      document.querySelectorAll('.spin').forEach((el) => el.classList.toggle('is-hint', el.dataset.unit === hint));
+      document.querySelector('.dial-switch')?.classList.toggle('is-hint', hint === 'switch');
       i++;
     };
     tick();
-    if (s.times.length > 1 || s.hint) cycle = setInterval(tick, CYCLE_MS);
+    if (s.frames.length > 1) cycle = setInterval(tick, s.ms ?? CYCLE_MS);
 
     progress = { ...progress, step };
     storage.write(progress);
@@ -215,7 +239,7 @@ export function initLessons(strings) {
   subscribe((_, source) => {
     if (cycle && source !== 'lesson' && source !== 'init') {
       stopCycle();
-      document.querySelectorAll('.spin.is-hint').forEach((el) => el.classList.remove('is-hint'));
+      clearHints();
     }
   });
 

@@ -71,6 +71,7 @@ function setupSpin(spin, strings) {
   }, { passive: false });
 
   return (value) => {
+    // The digital clock always shows two digits (08:15), like a real one.
     const text = pad(value);
     digits.querySelectorAll('.slot').forEach((slot, i) => { slot.textContent = text[i]; });
     digits.setAttribute('aria-valuenow', String(value));

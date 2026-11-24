@@ -83,15 +83,19 @@ test('set-the-clock accepts ±2 minutes, also across midnight', () => {
 });
 
 test('explanations', () => {
-  assert.equal(explain({ type: 'pair', h: 17, answer: '05' }, strings), '17 − 12 = 05. They are said the same way.');
-  assert.equal(explain({ type: 'pair', h: 3, answer: '15' }, strings), '03 + 12 = 15. They are said the same way.');
+  assert.equal(explain({ type: 'pair', h: 17, answer: '5' }, strings), '17 − 12 = 5. Both are said "five".');
+  assert.equal(explain({ type: 'pair', h: 3, answer: '15' }, strings), '3 + 12 = 15. Both are said "three".');
+  assert.equal(explain({ type: 'pair', h: 8, answer: '20' }, strings), '8 + 12 = 20. Both are said "eight".');
+  assert.equal(explain({ type: 'pair', h: 0, answer: '12' }, strings), '0 + 12 = 12. Both are said "twelve".');
   assert.equal(explain({ type: 'part', h: 20, m: 0 }, strings), '20:00 belongs to Evening (19–21).');
-  assert.equal(explain({ type: 'part', h: 6, m: 30 }, strings), '06:30 belongs to Sunrise (06).');
-  assert.equal(explain({ type: 'say', h: 15, m: 45 }, strings), '15 − 12 = 03, said "three"; 45 is "forty-five"; and it\'s in the afternoon.');
-  assert.equal(explain({ type: 'say', h: 8, m: 0 }, strings), '08 is said "eight"; 00 is "o\'clock"; and it\'s in the morning.');
-  assert.equal(explain({ type: 'say', h: 12, m: 5 }, strings), '12 − 12 = 00, said "twelve"; 05 is "five"; and it\'s at midday.');
+  assert.equal(explain({ type: 'part', h: 6, m: 30 }, strings), '6:30 belongs to Sunrise (6).');
+  assert.equal(explain({ type: 'say', h: 15, m: 45 }, strings), '15 − 12 = 3, said "three"; 45 is "forty-five"; and it\'s in the afternoon.');
+  assert.equal(explain({ type: 'say', h: 8, m: 0 }, strings), '8 is said "eight"; 00 is "o\'clock"; and it\'s in the morning.');
+  assert.equal(explain({ type: 'say', h: 12, m: 5 }, strings), '12 − 12 = 0, said "twelve"; 05 is "five"; and it\'s at midday.');
+  assert.equal(explain({ type: 'set', via: 'dial', h: 18, m: 45, answer: '18:45' }, strings), '18 − 12 = 6, so the short hand goes to 6. 18 belongs to Sunset, so choose Sunset under the clock.');
+  assert.equal(explain({ type: 'set', via: 'dial', h: 3, m: 20, answer: '3:20' }, strings), 'The short hand goes to 3. 3 belongs to Night, so choose Night under the clock.');
   assert.equal(explain({ type: 'set', h: 22, m: 35, answer: '22:35' }, strings), '"ten" at night is in the second half of the day: 10 + 12 = 22. So it\'s 22:35.');
-  assert.equal(explain({ type: 'set', h: 8, m: 15, answer: '08:15' }, strings), '"eight" in the morning is in the first half of the day, so it\'s 08:15.');
+  assert.equal(explain({ type: 'set', h: 8, m: 15, answer: '8:15' }, strings), '"eight" in the morning is in the first half of the day, so it\'s 8:15.');
   for (const seed of SEEDS.slice(0, 50)) {
     for (const q of generateRound(seeded(seed))) assert.ok(explain(q, strings).length > 10);
   }

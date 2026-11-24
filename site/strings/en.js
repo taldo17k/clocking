@@ -28,7 +28,7 @@ export default {
   },
   heroTitle: 'The 24-hour clock',
   heroLead: "A day has 24 hours. Let's learn to read every one of them.",
-  hoursLabel: 'hours (00–23)',
+  hoursLabel: 'hours (0–23)',
   minutesLabel: 'minutes (00–59)',
   hoursGroup: 'Hours',
   minutesGroup: 'Minutes',
@@ -43,13 +43,12 @@ export default {
   stopButton: 'Stop',
   pairsTitle: 'Hour pairs',
   pairsHint: 'The two hours in each row are said the same way. Tap an hour or a picture to jump to it.',
-  pairsLeft: '00–11',
+  pairsLeft: '0–11',
   pairsRight: '12–23',
-  dialTitle: 'The two-ring clock',
-  dialHint: 'Drag the hands or tap a number. Both hours of a pair sit in the same spot.',
-  dialLabel: 'Two-ring clock. Up and down change the hour, left and right change the minutes.',
-  legendInner: 'Inner ring: 00–11',
-  legendOuter: 'Outer ring: 12–23',
+  dialTitle: 'The dial clock',
+  dialHint: 'Move the hands like on a regular clock, then pick the time of day with the sun and moon.',
+  dialLabel: 'Dial clock. Up and down change the hour, left and right change the minutes.',
+  dialSwitch: 'Time of day',
   stageTitle: 'The digital clock',
   stageHint: 'Change the hours and minutes with the arrows, by swiping up and down, or with the keyboard.',
   footerCredit: 'Based on a hand-drawn lesson.',
@@ -67,11 +66,11 @@ export default {
       part: (time) => `What part of the day is **${time}**?`,
       say: (time) => `How do we say **${time}**?`,
       setDigital: (words) => `Set the **digital clock** to **${words}**.`,
-      setDial: (words) => `Set the **two-ring clock** to **${words}**.`,
+      setDial: (time) => `Set the **dial clock** to **${time}**.`,
     },
     setHint: {
       digital: 'Use the arrows, swipe the numbers up or down, or use the keyboard. Then press Check.',
-      dial: 'Drag the hands or tap a number on the right ring. Then press Check.',
+      dial: 'Work out the part of the day from the hour, move the hands, then pick it under the clock. Then press Check.',
     },
     soundOn: 'Sound on',
     soundOff: 'Sound off',
@@ -93,13 +92,14 @@ export default {
       practice: 'Keep practising. The lesson can help too.',
     },
     explain: {
-      pairUp: (hh, partner) => `${hh} + 12 = ${partner}. They are said the same way.`,
-      pairDown: (hh, partner) => `${hh} − 12 = ${partner}. They are said the same way.`,
+      pairUp: (hh, partner, word) => `${hh} + 12 = ${partner}. Both are said "${word}".`,
+      pairDown: (hh, partner, word) => `${hh} − 12 = ${partner}. Both are said "${word}".`,
       part: (time, name, range) => `${time} belongs to ${name} (${range}).`,
       minus: (hh, small, word) => `${hh} − 12 = ${small}, said "${word}"`,
-      midnight: '00 is said "twelve"',
+      midnight: '0 is said "twelve"',
       same: (hh, word) => `${hh} is said "${word}"`,
       say: (hourRule, mm, minuteWords, phrase) => `${hourRule}; ${mm} is "${minuteWords}"; and it's ${phrase}.`,
+      setDial: (hh, dialHour, phase) => `${hh > 12 ? `${hh} − 12 = ${dialHour}, so the short hand goes to ${dialHour}` : `The short hand goes to ${dialHour}`}. ${hh} belongs to ${phase}, so choose ${phase} under the clock.`,
       plus: (small, hh) => `${small} + 12 = ${hh}`,
       set: (word, phrase, answer, plus) => (plus
         ? `"${word}" ${phrase} is in the second half of the day: ${plus}. So it's ${answer}.`
@@ -119,32 +119,40 @@ export default {
     steps: {
       day: {
         title: 'A day has 24 hours',
-        body: 'From midnight to midnight the clock counts **24 hours**, from **00** to **23**. Each part of the day has its own sky: night, sunrise, morning, midday, afternoon, sunset and evening. Watch the pictures light up as the hours go by.',
+        body: 'From midnight to midnight the clock counts **24 hours**, from **0** to **23**. Each part of the day has its own sky: night, sunrise, morning, midday, afternoon, sunset and evening. Watch the pictures light up as the hours go by.',
       },
       pairs: {
         title: 'Hour pairs',
-        body: 'Every hour from **00 to 11** has a partner **12 hours later**: 03 and 15, 08 and 20, 10 and 22. To find the partner, **add 12** or **take away 12**. Both hours in a pair are **said the same way**: 15 is "three" and 22 is "ten". 00 and 12 are both "twelve".',
+        body: 'Every hour from **0 to 11** has a partner **12 hours later**: 3 and 15, 8 and 20, 10 and 22. To find the partner, **add 12** or **take away 12**. Both hours in a pair are **said the same way**: 15 is "three" and 22 is "ten". 0 and 12 are both "twelve".',
       },
-      rings: {
-        title: 'Two rings, one spot',
-        body: 'On the two-ring clock the **inner ring** holds 00–11 and the **outer ring** holds 12–23. Both hours of a pair sit in **the same spot**, so the hour hand points at both of them. The golden ring shows which half of the day it is.',
+      digital: {
+        title: 'Reading the digital clock',
+        body: 'The digital clock shows the time in numbers. Before the colon are the **hours**, from 0 to 23. After the colon are the **minutes**, from 00 to 59. So **14:35** means 14 hours and 35 minutes.',
       },
-      structure: {
-        title: 'Hours : minutes',
-        body: 'A 24-hour time has two parts. Before the colon are the **hours**, from 00 to 23. After the colon are the **minutes**, from 00 to 59. So **14:35** means 14 hours and 35 minutes.',
+      dial: {
+        title: 'Reading the dial clock',
+        body: 'The dial clock has two hands. The **short hand** shows the hour and the **long hand** shows the minutes. The numbers go from 1 to 12 with **12 at the top**, so each number stands for **two hours**: 8 is 8 in the morning and also 20 in the evening. The **sun and moon** under the clock show which one it is.',
       },
       example1: {
-        title: 'Example 1: 08:15',
-        body: "Let's read **08:15** one part at a time:",
+        title: 'Example 1: 8:15',
+        body: "Let's read **8:15** one part at a time:",
       },
       example2: {
         title: 'Example 2: 22:39',
         body: "Let's read **22:39**. The hour **22** is bigger than 12, so first **take away 12** to find its partner, then read it the same way:",
       },
+      roni: {
+        title: "Roni's turn: the digital clock",
+        body: 'Roni needs to set the **digital clock** to **ten thirty-five at night**. "Ten" at night is in the second half of the day: 10 + 12 = 22. So Roni sets the hours to **22** and the minutes to **35**: **22:35**.',
+      },
+      mika: {
+        title: "Mika's turn: the dial clock",
+        body: "Mika needs to set the **dial clock** to **19:30**. 19 − 12 = 7, so Mika turns the **short hand** to **7** and the **long hand** to **6** (that's 30 minutes). 19 is in the **evening**, so Mika picks the **moon**.",
+      },
     },
     breakdown: {
       pair: (hh, partner) => `${hh} − 12 = ${partner}`,
-      midnight: '00 is said like 12',
+      midnight: '0 is said like 12',
       noMinutes: "o'clock",
       arrow: '→',
     },
@@ -166,8 +174,8 @@ export default {
       'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen',
       'eighteen', 'nineteen'],
     tens: ['', '', 'twenty', 'thirty', 'forty', 'fifty'],
-    oh: 'oh',            // 08:05 → "eight oh five"
-    oclock: "o'clock",   // 08:00 → "eight o'clock"
+    oh: 'oh',            // 8:05 → "eight oh five"
+    oclock: "o'clock",   // 8:00 → "eight o'clock"
     and: 'and',
     minute: 'minute',
     minutes: 'minutes',

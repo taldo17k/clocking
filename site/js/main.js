@@ -13,8 +13,14 @@ import { initName } from './name.js';
 const $ = (id) => document.getElementById(id);
 
 // The language comes from the page itself: /clocking/ is English, /clocking/he/
-// is Hebrew (<html lang="he">). Hebrew text is only downloaded on the Hebrew page.
-const strings = document.documentElement.lang === 'he' ? (await import('../strings/he.js')).default : en;
+// is Hebrew (<html lang="he">), /clocking/zh/ is Chinese (<html lang="zh-CN">).
+// Each page only downloads its own language's text.
+const LANGUAGES = {
+  he: () => import('../strings/he.js'),
+  zh: () => import('../strings/zh.js'),
+};
+const code = document.documentElement.lang.split('-')[0];
+const strings = LANGUAGES[code] ? (await LANGUAGES[code]()).default : en;
 useSpeech(strings.speech);
 
 function applyStrings() {

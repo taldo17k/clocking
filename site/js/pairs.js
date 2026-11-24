@@ -1,11 +1,11 @@
 // The hour pairs board, laid out like the hand-made page: the pairs table in
-// the middle (00 = 12 … 11 = 23), brackets grouping the rows, and a sky scene
-// for each part of the day — 00–11 on the left, 12–23 on the right.
+// the middle (0 = 12 … 11 = 23), brackets grouping the rows, and a sky scene
+// for each part of the day — 0–11 on the left, 12–23 on the right.
 // The current row is highlighted, the current hour is circled, its pair gets a
 // dashed circle, and the scene for the current hour lights up.
 import { getTime, setTime, subscribe } from './state.js';
 import { PHASES } from './phases.js';
-import { formatRange, pad, pair, partOfDay } from './time.js';
+import { formatRange, pair, partOfDay } from './time.js';
 import { createScene } from './scene.js';
 
 const HEADER_ROWS = 1;
@@ -69,9 +69,9 @@ export function initPairs(board, strings) {
     btn.className = 'hour-btn';
     btn.dataset.hour = String(hour);
     btn.dataset.phase = partOfDay(hour);
-    btn.textContent = pad(hour);
+    btn.textContent = String(hour);
     btn.setAttribute('aria-pressed', 'false');
-    btn.setAttribute('aria-label', `${pad(hour)}, ${strings.phases[partOfDay(hour)]}`);
+    btn.setAttribute('aria-label', `${hour}, ${strings.phases[partOfDay(hour)]}`);
     btn.addEventListener('click', () => setTime(hour, getTime().m, 'pairs'));
     return btn;
   };

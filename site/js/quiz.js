@@ -5,7 +5,7 @@ import { getTime, setTime } from './state.js';
 import {
   ROUND_SIZE, generateRound, isCorrectChoice, isCorrectSet, explain, scoreBand,
 } from './quiz-core.js';
-import { format, pad } from './time.js';
+import { format } from './time.js';
 import { play, isMuted, setMuted } from './sound.js';
 import { ensureName, getName } from './name.js';
 
@@ -15,7 +15,7 @@ const STREAK_CELEBRATIONS = new Set([3, 5, 8, 10]);
 // Where a set-the-clock question sends the learner: what to scroll to and what glows.
 const SET_TARGETS = {
   digital: { scroll: '.stage', glow: '.stage' },
-  dial: { scroll: '.dial-wrap', glow: '.dial-panel' },
+  dial: { scroll: '#dial', glow: '.dial-panel' },   // the clock and its sun/moon switch
 };
 
 const storage = {
@@ -161,10 +161,10 @@ export function initQuiz(strings) {
     updateStats();
 
     const time = format(q.h, q.m);
-    if (q.type === 'pair') richText(prompt, Q.prompts.pair(pad(q.h)));
+    if (q.type === 'pair') richText(prompt, Q.prompts.pair(String(q.h)));
     if (q.type === 'part') richText(prompt, Q.prompts.part(time));
     if (q.type === 'say') richText(prompt, Q.prompts.say(time));
-    if (q.type === 'set') richText(prompt, q.via === 'dial' ? Q.prompts.setDial(q.words) : Q.prompts.setDigital(q.words));
+    if (q.type === 'set') richText(prompt, q.via === 'dial' ? Q.prompts.setDial(format(q.h, q.m)) : Q.prompts.setDigital(q.words));
 
     optionsBox.replaceChildren();
     if (q.type === 'set') {

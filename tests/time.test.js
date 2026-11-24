@@ -7,10 +7,11 @@ import {
 
 const ALL_HOURS = Array.from({ length: 24 }, (_, h) => h);
 
-test('format pads hours and minutes', () => {
+test('format: hours without a leading zero, minutes with two digits', () => {
   assert.equal(pad(7), '07');
-  assert.equal(format(8, 15), '08:15');
-  assert.equal(format(0, 0), '00:00');
+  assert.equal(format(8, 15), '8:15');
+  assert.equal(format(0, 0), '0:00');
+  assert.equal(format(22, 5), '22:05');
   assert.equal(format(23, 59), '23:59');
 });
 
@@ -85,18 +86,14 @@ test('addMinutes wraps around midnight both ways', () => {
   assert.deepEqual(addMinutes(1, 0, -3 * 24 * 60 - 61), { h: 23, m: 59 });
 });
 
-test('handAngles: rings follow the table columns, pairs share an angle', () => {
-  assert.deepEqual(handAngles(0, 0), { hour: 0, minute: 0, ring: 'inner' });
-  assert.deepEqual(handAngles(12, 0), { hour: 0, minute: 0, ring: 'outer' });
-  assert.deepEqual(handAngles(3, 0), { hour: 90, minute: 0, ring: 'inner' });
-  assert.deepEqual(handAngles(15, 0), { hour: 90, minute: 0, ring: 'outer' });
-  assert.deepEqual(handAngles(6, 30), { hour: 195, minute: 180, ring: 'inner' });
+test('handAngles: 12 at the top, pairs share an angle', () => {
+  assert.deepEqual(handAngles(0, 0), { hour: 0, minute: 0 });
+  assert.deepEqual(handAngles(12, 0), { hour: 0, minute: 0 });
+  assert.deepEqual(handAngles(3, 0), { hour: 90, minute: 0 });
+  assert.deepEqual(handAngles(15, 0), { hour: 90, minute: 0 });
+  assert.deepEqual(handAngles(6, 30), { hour: 195, minute: 180 });
   for (const h of ALL_HOURS) {
-    const a = handAngles(h, 20);
-    const b = handAngles(pair(h), 20);
-    assert.equal(a.hour, b.hour, `hour ${h} and ${pair(h)} share an angle`);
-    assert.notEqual(a.ring, b.ring);
-    assert.equal(a.ring, h < 12 ? 'inner' : 'outer');
+    assert.equal(handAngles(h, 20).hour, handAngles(pair(h), 20).hour, `hour ${h} and ${pair(h)} share an angle`);
   }
 });
 

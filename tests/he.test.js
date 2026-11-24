@@ -60,7 +60,7 @@ test('the quiz works in Hebrew', () => {
         assert.ok(!/[a-z]{3,}/i.test(text.replace(/⁦|⁩/g, '')), `English left in: ${text}`);
       }
     }
-    assert.equal(explain({ type: 'say', h: 15, m: 45 }, he), '⁦15 − 12 = 03⁩, ואומרים "שלוש"; 45 זה "ארבעים וחמש דקות"; וזה אחר הצהריים.');
+    assert.equal(explain({ type: 'say', h: 15, m: 45 }, he), '⁦15 − 12 = 3⁩, ואומרים "שלוש"; 45 זה "ארבעים וחמש דקות"; וזה אחר הצהריים.');
     assert.equal(explain({ type: 'set', h: 22, m: 35, answer: format(22, 35) }, he), '"עשר" בלילה זה בחצי השני של היממה: ⁦10 + 12 = 22⁩. לכן השעה 22:35.');
   } finally {
     useSpeech(en.speech);

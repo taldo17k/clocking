@@ -2,16 +2,17 @@
 <html lang="he" dir="rtl" data-theme="dark">
 <head>
   <meta charset="utf-8">
-  <!-- Generated from ../index.html by scripts/build-he.mjs. Edit those, then run: npm run build:he -->
+  <!-- Generated from ../index.html by scripts/build-pages.mjs. Edit those, then run: npm run build:pages -->
   <base href="../">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Clocking · 24 שעות ביממה</title>
-  <meta name="description" content="דרך ידידותית ואינטראקטיבית ללמוד לקרוא שעון של 24 שעות: זוגות שעות, שעון עם שתי טבעות, שיעור קצר ותרגול.">
+  <meta name="description" content="דרך ידידותית ואינטראקטיבית ללמוד לקרוא שעון של 24 שעות: זוגות שעות, שעון מחוגים, שיעור קצר ותרגול.">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0c0e1e">
   <link rel="canonical" href="https://taldo17k.github.io/clocking/he/">
   <link rel="alternate" hreflang="en" href="https://taldo17k.github.io/clocking/">
   <link rel="alternate" hreflang="he" href="https://taldo17k.github.io/clocking/he/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://taldo17k.github.io/clocking/zh/">
   <link rel="alternate" hreflang="x-default" href="https://taldo17k.github.io/clocking/">
 
   <!-- Link previews (WhatsApp, Facebook, Slack, X, LinkedIn…) -->
@@ -19,7 +20,7 @@
   <meta property="og:site_name" content="Clocking">
   <meta property="og:locale" content="he_IL">
   <meta property="og:title" content="Clocking · 24 שעות ביממה">
-  <meta property="og:description" content="דרך ידידותית ואינטראקטיבית ללמוד לקרוא שעון של 24 שעות: זוגות שעות, שעון עם שתי טבעות, שיעור קצר ותרגול.">
+  <meta property="og:description" content="דרך ידידותית ואינטראקטיבית ללמוד לקרוא שעון של 24 שעות: זוגות שעות, שעון מחוגים, שיעור קצר ותרגול.">
   <meta property="og:url" content="https://taldo17k.github.io/clocking/he/">
   <meta property="og:image" content="https://taldo17k.github.io/clocking/assets/og-image-he.jpg">
   <meta property="og:image:type" content="image/jpeg">
@@ -28,7 +29,7 @@
   <meta property="og:image:alt" content="Clocking: 24 שעות ביממה, עם שבע תמונות שמיים מהלילה ועד הערב.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Clocking · 24 שעות ביממה">
-  <meta name="twitter:description" content="דרך ידידותית ואינטראקטיבית ללמוד לקרוא שעון של 24 שעות: זוגות שעות, שעון עם שתי טבעות, שיעור קצר ותרגול.">
+  <meta name="twitter:description" content="דרך ידידותית ואינטראקטיבית ללמוד לקרוא שעון של 24 שעות: זוגות שעות, שעון מחוגים, שיעור קצר ותרגול.">
   <meta name="twitter:image" content="https://taldo17k.github.io/clocking/assets/og-image-he.jpg">
   <meta name="twitter:image:alt" content="Clocking: 24 שעות ביממה, עם שבע תמונות שמיים מהלילה ועד הערב.">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -90,7 +91,7 @@
             </div>
           </div>
           <div class="digital-labels">
-            <span data-i18n="hoursLabel">שעות (⁦00⁠–⁠23⁩)</span>
+            <span data-i18n="hoursLabel">שעות (⁦0⁠–⁠23⁩)</span>
             <span data-i18n="minutesLabel">דקות (⁦00⁠–⁠59⁩)</span>
           </div>
           <p class="say"><span id="say-text">It's eight fifteen in the morning.</span> <span class="ampm" id="ampm">8:15 AM</span></p>
@@ -105,13 +106,9 @@
     </section>
 
     <section class="panel card dial-panel" aria-labelledby="dial-title">
-      <h2 id="dial-title"><span class="highlight-green" data-i18n="dialTitle">שעון הטבעות</span></h2>
-      <p class="muted" data-i18n="dialHint">גררו את המחוגים או לחצו על מספר. שתי השעות של כל זוג נמצאות באותו מקום.</p>
+      <h2 id="dial-title"><span class="highlight-green" data-i18n="dialTitle">שעון המחוגים</span></h2>
+      <p class="muted" data-i18n="dialHint">הזיזו את המחוגים כמו בשעון רגיל, ואז בחרו את החלק ביום עם השמש והירח.</p>
       <div class="dial" id="dial">
-        <ul class="dial-legend">
-          <li class="legend-inner" data-i18n="legendInner">טבעת פנימית: ⁦00⁠–⁠11⁩</li>
-          <li class="legend-outer" data-i18n="legendOuter">טבעת חיצונית: ⁦12⁠–⁠23⁩</li>
-        </ul>
       </div>
     </section>
 

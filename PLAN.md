@@ -246,7 +246,7 @@ All the scenes are animated (`js/scene.js`, `css/scene.css`): layered hills, a s
 - [x] The Hebrew lesson text matches the original page word for word for both examples.
 
 - *As built:*
-  - **The Hebrew page:** `site/he/index.html` is generated from `site/index.html` by `npm run build:he` (`scripts/build-he.mjs`). It shares the CSS, JavaScript and images through `<base href="../">`, starts with the Hebrew text already filled in, and has its own preview card (`assets/og-image-he.jpg`). A unit test fails, and so does the deploy, if it is out of date.
+  - **The Hebrew page:** `site/he/index.html` is generated from `site/index.html` by `npm run build:he` (now `npm run build:pages`, `scripts/build-pages.mjs`). It shares the CSS, JavaScript and images through `<base href="../">`, starts with the Hebrew text already filled in, and has its own preview card (`assets/og-image-he.jpg`). A unit test fails, and so does the deploy, if it is out of date.
   - **Speaking times:** `time.js` speaks both languages (`useSpeech`). Hebrew uses feminine numbers and the page's wording: "השעה שמונה וחמש עשרה דקות בבוקר", "השעה עשר ושלושים ותשע דקות בלילה", "שמונה ודקה אחת", "שמונה ושתי דקות", "שמונה בבוקר".
   - **Layout:** midday is 12–14 in both languages. The digital clock and the hour pairs board keep the drawing's left-to-right layout, and sums and ranges are kept left-to-right inside Hebrew text. Hebrew uses the Rubik font for body text, has no AM/PM hint, and addresses learners in the plural ("לחצו").
   - **Checks:** a full Hebrew quiz round, the lesson and phone layouts are checked in the browser. Lighthouse for `/he/` (local, mobile): 98/100/100/100.
@@ -258,3 +258,20 @@ All the scenes are animated (`js/scene.js`, `css/scene.css`): layered hills, a s
 - The site is live on GitHub Pages and updates automatically on every push to `main`.
 - A learner can explore the digital clock and the two-ring dial, go through the four lessons and finish a quiz, on desktop or phone.
 - Visits are counted anonymously and can be viewed on the analytics dashboard.
+
+## Step 10: Chinese version (Simplified)
+
+- [x] `/clocking/zh/` opens in Chinese before any script runs, with its own preview card (`assets/og-image-zh.jpg`).
+- [x] Times follow standard Mandarin: part of the day first, 两点, 零五分, 凌晨 for 00–05. 08:15 → "现在是上午八点十五分。", 22:39 → "现在是晚上十点三十九分。"
+- [x] Lesson, quiz (a full round of 10) and phone layout checked in the browser; side labels on phones read top to bottom with upright characters.
+
+- *As built:* `scripts/build-pages.mjs` builds every translated page (`npm run build:pages`; `build:he` still works). Chinese characters use the visitor's system fonts, so no large font download. Midday is 12–14 (中午), as in the other languages.
+
+## Step 11: Feedback from the first testers
+
+- [x] Hours have no leading zero in text, questions and lessons (8:15, 0–11, "8 = 20"); minutes keep two digits (8:05). The digital clock itself keeps two-digit hours (08:15), like a real one.
+- [x] Hour-pair answers end with how both hours are said ("8 + 12 = 20. Both are said "eight".").
+- [x] The two-ring clock became a regular dial clock (1–12, 12 at the top). A switch under it picks the time of day: sun, moon, sunrise (6) or sunset (18), showing both hours, e.g. Morning 8 / Evening 20. Moving the hands keeps the chosen half.
+- [x] The lesson has 8 steps: new "Reading the digital clock" and "Reading the dial clock", and two demonstrations played on the real clocks: Roni sets the digital clock to 22:35, Mika sets the dial clock to 19:30 and presses the moon.
+- [x] All of it in English, Hebrew and Chinese; the three preview cards were redrawn.
+- [x] Dial-clock questions give the time in numbers ("Set the dial clock to 18:45"): the learner works out the part of the day from the hour. The explanation shows where the short hand goes and which part of the day to pick. Mika's lesson step works the same way.

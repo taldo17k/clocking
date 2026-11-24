@@ -1,17 +1,20 @@
-// Two-ring analog clock (SVG). Inner ring: 00–11 (left column of the pairs
-// table). Outer ring: 12–23 (right column). Both hours of a pair sit at the
-// same spot, so the hour hand points at both; the active ring is highlighted
-// and the hour hand reaches into it.
+// The dial clock (SVG): a regular clock face, 1–12 with 12 at the top. Every
+// number stands for two hours (8 is 8 in the morning and 20 in the evening),
+// so a switch under the clock picks which one: sun, moon, sunrise or sunset,
+// depending on the part of the day.
+//
+// Moving the hands keeps the chosen half of the day (the hour hand on 8 stays
+// 8 or 20); only the switch moves between the two hours of a pair.
 import { getTime, setTime, shiftTime, subscribe } from './state.js';
-import { format, handAngles, pad, pair, partOfDay, spoken } from './time.js';
+import { format, handAngles, partOfDay, spoken } from './time.js';
 import { createScene } from './scene.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const C = 160;            // center
 const R_FACE = 154;
-const R_OUTER = 125;      // outer ring numbers (12–23)
-const R_INNER = 82;       // inner ring numbers (00–11)
-const HOUR_LEN = { inner: 54, outer: 98 };
+const R_NUM = 122;        // the numbers 1–12
+const BAND = 40;          // width of the frosted band behind the numbers
+const HOUR_LEN = 78;
 const MINUTE_LEN = 138;
 
 const polar = (r, deg) => {
@@ -27,6 +30,18 @@ function el(name, attrs = {}, parent) {
   return node;
 }
 
+// Small icons for the switch. Sunrise and sunset are a half sun on the horizon.
+const ICONS = {
+  sun: '<circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/>',
+  moon: '<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>',
+  sunrise: '<path d="M7 17a5 5 0 0 1 10 0"/><path d="M3 20h18M12 4v5M9 6.5l3-2.5 3 2.5M4.2 11.2l1.5 1.5M19.8 11.2l-1.5 1.5"/>',
+  sunset: '<path d="M7 17a5 5 0 0 1 10 0"/><path d="M3 20h18M12 4v5M9 6.5l3 2.5 3-2.5M4.2 11.2l1.5 1.5M19.8 11.2l-1.5 1.5"/>',
+};
+const ICON_FOR = {
+  night: 'moon', sunrise: 'sunrise', morning: 'sun', midday: 'sun',
+  afternoon: 'sun', sunset: 'sunset', evening: 'moon',
+};
+
 function build(strings) {
   const svg = el('svg', {
     viewBox: '0 0 320 320', class: 'dial-svg', role: 'slider', tabindex: 0,
@@ -34,12 +49,8 @@ function build(strings) {
   });
   el('circle', { class: 'face', cx: C, cy: C, r: R_FACE }, svg);
   el('circle', { class: 'rim', cx: C, cy: C, r: 148.5 }, svg);
-  el('circle', { class: 'band band-outer', cx: C, cy: C, r: R_OUTER }, svg);
-  el('circle', { class: 'band band-inner', cx: C, cy: C, r: R_INNER }, svg);
-  [R_INNER - 21, R_INNER + 21, R_OUTER + 19].forEach((r) => el('circle', { class: 'ring-line', cx: C, cy: C, r }, svg));
-  // Golden edges that light up around the ring in use.
-  [[R_INNER - 21, 'inner'], [R_INNER + 21, 'inner'], [R_OUTER - 19, 'outer'], [R_OUTER + 19, 'outer']]
-    .forEach(([r, ring]) => el('circle', { class: `ring-edge ring-edge-${ring}`, cx: C, cy: C, r }, svg));
+  el('circle', { class: 'band', cx: C, cy: C, r: R_NUM }, svg);
+  [R_NUM - BAND / 2, R_NUM + BAND / 2].forEach((r) => el('circle', { class: 'ring-edge', cx: C, cy: C, r }, svg));
 
   for (let i = 0; i < 60; i++) {
     const major = i % 5 === 0;
@@ -49,30 +60,45 @@ function build(strings) {
   }
 
   const numbers = [];
-  for (let k = 0; k < 12; k++) {
-    [[k, R_INNER, 'inner', 13], [k + 12, R_OUTER, 'outer', 15]].forEach(([hour, r, ring, size]) => {
-      const [x, y] = polar(r, k * 30);
-      const g = el('g', { class: `num num-${ring}`, 'data-hour': hour, transform: `translate(${fix(x)} ${fix(y)})` }, svg);
-      el('circle', { class: 'num-bg', r: size }, g);
-      const text = el('text', {}, g);
-      text.textContent = pad(hour);
-      numbers.push(g);
-    });
+  for (let n = 1; n <= 12; n++) {
+    const [x, y] = polar(R_NUM, n * 30);
+    const g = el('g', { class: 'num', 'data-n': n, transform: `translate(${fix(x)} ${fix(y)})` }, svg);
+    el('circle', { class: 'num-bg', r: 16 }, g);
+    el('text', {}, g).textContent = String(n);
+    numbers.push(g);
   }
 
   const hand = (name, len) => {
     const g = el('g', { class: `hand hand-${name}`, 'data-hand': name }, svg);
     // A light outline under each hand keeps it visible over dark night skies.
-    const outline = el('line', { class: 'hand-outline', x1: C, y1: C + 10, x2: C, y2: C - len }, g);
-    const line = el('line', { class: 'hand-line', x1: C, y1: C + 10, x2: C, y2: C - len }, g);
-    const hit = el('line', { class: 'hand-hit', x1: C, y1: C, x2: C, y2: C - len }, g);
-    return { g, line, outline, hit };
+    el('line', { class: 'hand-outline', x1: C, y1: C + 10, x2: C, y2: C - len }, g);
+    el('line', { class: 'hand-line', x1: C, y1: C + 10, x2: C, y2: C - len }, g);
+    el('line', { class: 'hand-hit', x1: C, y1: C, x2: C, y2: C - len }, g);
+    return g;
   };
   const minute = hand('minute', MINUTE_LEN);
-  const hour = hand('hour', HOUR_LEN.inner);
+  const hour = hand('hour', HOUR_LEN);
   el('circle', { class: 'hub', cx: C, cy: C, r: 7 }, svg);
 
   return { svg, numbers, hour, minute };
+}
+
+/** The sun/moon switch: the two hours the hour hand points at (8 and 20). */
+function buildSwitch(strings) {
+  const group = document.createElement('div');
+  group.className = 'dial-switch';
+  group.setAttribute('role', 'group');
+  group.setAttribute('aria-label', strings.dialSwitch);
+  const buttons = ['first', 'second'].map((half) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'dial-half';
+    btn.dataset.half = half;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"></svg><span class="dial-half-name"></span><span class="dial-half-hour"></span>';
+    group.append(btn);
+    return btn;
+  });
+  return { group, buttons };
 }
 
 // Shortest signed difference, so dragging across the top keeps going forward.
@@ -88,7 +114,14 @@ export function initDial(root, strings) {
   const wrap = document.createElement('div');
   wrap.className = 'dial-wrap';
   wrap.append(scene, svg);
-  root.prepend(wrap);
+  const { group: halfSwitch, buttons } = buildSwitch(strings);
+  root.prepend(wrap, halfSwitch);
+
+  buttons.forEach((btn) => btn.addEventListener('click', () => {
+    const { h, m } = getTime();
+    const want = btn.dataset.half === 'first' ? h % 12 : (h % 12) + 12;
+    setTime(want, m, 'dial');
+  }));
 
   const angleAt = (e) => {
     const r = svg.getBoundingClientRect();
@@ -103,11 +136,11 @@ export function initDial(root, strings) {
       const target = Math.round(angle / 6) % 60;
       shiftTime(signedDiff(target, m, 60), 'dial');
     } else {
-      // Hour hand: position within 12 hours, snapped to 5 minutes. Crossing
-      // the top moves to the other ring (11 → 12, 23 → 00).
+      // Hour hand: where it points within 12 hours, snapped to 5 minutes,
+      // staying in the same half of the day (the switch changes the half).
       const target = (Math.round((angle * 2) / 5) * 5) % 720;
-      const now = (h % 12) * 60 + m;
-      shiftTime(signedDiff(target, now, 720), 'dial');
+      const half = h < 12 ? 0 : 12;
+      setTime(half + Math.floor(target / 60), target % 60, 'dial');
     }
   };
 
@@ -120,8 +153,8 @@ export function initDial(root, strings) {
   };
 
   // A press that moves becomes a drag (of the hand under the finger, or the
-  // closest one); a press that stays put is a tap. Tapping a number jumps to
-  // that hour, even when a hand lies over it; tapping the face moves the
+  // closest one); a press that stays put is a tap. Tapping a number moves the
+  // hour hand there (same half of the day); tapping the face moves the
   // closest hand there.
   const DRAG_PX = 6;
   let press = null;
@@ -148,8 +181,10 @@ export function initDial(root, strings) {
       const num = document.elementsFromPoint(e.clientX, e.clientY)
         .map((node) => node.closest?.('.num'))
         .find(Boolean);
-      if (num) setTime(Number(num.dataset.hour), getTime().m, 'dial');
-      else {
+      if (num) {
+        const { h, m } = getTime();
+        setTime((h < 12 ? 0 : 12) + (Number(num.dataset.n) % 12), m, 'dial');
+      } else {
         const a = angleAt(e);
         moveHand(closestHand(a), a);
       }
@@ -176,22 +211,31 @@ export function initDial(root, strings) {
     const a = handAngles(h, m);
     shown.hour = unwrap(shown.hour, a.hour);
     shown.minute = unwrap(shown.minute, a.minute);
-    hour.g.style.transform = `rotate(${shown.hour}deg)`;
-    minute.g.style.transform = `rotate(${shown.minute}deg)`;
-    const tip = C - HOUR_LEN[a.ring];
-    hour.line.setAttribute('y2', tip);
-    hour.outline.setAttribute('y2', tip);
-    hour.hit.setAttribute('y2', tip);
+    hour.style.transform = `rotate(${shown.hour}deg)`;
+    minute.style.transform = `rotate(${shown.minute}deg)`;
 
-    root.dataset.ring = a.ring;
-    root.dataset.phase = partOfDay(h);
-    scene.dataset.phase = partOfDay(h);
-    const partner = pair(h);
-    numbers.forEach((g) => {
-      const n = Number(g.dataset.hour);
-      g.classList.toggle('is-active', n === h);
-      g.classList.toggle('is-pair', n === partner);
+    const phase = partOfDay(h);
+    root.dataset.phase = phase;
+    scene.dataset.phase = phase;
+    const n = h % 12 || 12;
+    numbers.forEach((g) => g.classList.toggle('is-active', Number(g.dataset.n) === n));
+
+    // The switch offers this hour and its partner, e.g. 8 (morning) and 20 (evening).
+    const hours = [h % 12, (h % 12) + 12];
+    buttons.forEach((btn, i) => {
+      const hh = hours[i];
+      const part = partOfDay(hh);
+      if (btn.dataset.hour !== String(hh)) {
+        btn.dataset.hour = String(hh);
+        btn.dataset.icon = ICON_FOR[part];
+        btn.querySelector('svg').innerHTML = ICONS[ICON_FOR[part]];
+        btn.querySelector('.dial-half-name').textContent = strings.phases[part];
+        btn.querySelector('.dial-half-hour').textContent = String(hh);
+        btn.setAttribute('aria-label', `${strings.phases[part]}, ${hh}`);
+      }
+      btn.setAttribute('aria-pressed', String(hh === h));
     });
+
     svg.setAttribute('aria-valuenow', String(h * 60 + m));
     svg.setAttribute('aria-valuetext', `${format(h, m)}, ${spoken(h, m)}`);
   });

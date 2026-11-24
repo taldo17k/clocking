@@ -2,7 +2,7 @@
 // Pure functions, no DOM, so they are unit-tested in tests/quiz.test.js.
 // Every answer is computed with time.js, the same rules the rest of the page uses.
 import { PHASES } from './phases.js';
-import { addMinutes, format, formatRange, minuteWords, numberWords, pad, pair, partOfDay, spoken, spokenAs, spokenHour } from './time.js';
+import { addMinutes, format, formatRange, hourWords, minuteWords, pad, pair, partOfDay, partPhrase, spoken, spokenAs, spokenHour } from './time.js';
 
 export const ROUND_SIZE = 10;
 export const SET_TOLERANCE_MIN = 2;
@@ -30,10 +30,10 @@ const MAKERS = {
   pair(rand) {
     const h = randInt(24, rand);
     const p = pair(h);
-    const answer = pad(p);
+    const answer = String(p);
     const options = withDistractors(answer, [
-      pad((p + 1) % 24), pad((p + 23) % 24), pad((h + 1) % 24), pad((h + 10) % 24), pad((p + 2) % 24),
-    ].filter((o) => o !== pad(h)), rand);
+      (p + 1) % 24, (p + 23) % 24, (h + 1) % 24, (h + 10) % 24, (p + 2) % 24,
+    ].map(String).filter((o) => o !== String(h)), rand);
     return { type: 'pair', key: `pair:${h}`, h, m: 0, options, answer };
   },
 
@@ -61,7 +61,7 @@ const MAKERS = {
     return { type: 'say', key: `say:${h}:${m}`, h, m, options, answer };
   },
 
-  // "Set the digital clock / two-ring clock to ten thirty-five at night." → 22:35
+  // "Set the digital clock / dial clock to ten thirty-five at night." → 22:35
   set(rand, via = 'digital') {
     const h = randInt(24, rand);
     const m = fiveMinutes(rand);
@@ -77,7 +77,7 @@ export function makeQuestion(type, rand = Math.random, via) {
 /**
  * Ten questions: 2 pair, 2 part, 3 say, 3 set, in random order, never the
  * same one twice. The set-the-clock questions use both clocks: at least one
- * on the digital clock and one on the two-ring clock.
+ * on the digital clock and one on the dial clock.
  */
 export function generateRound(rand = Math.random) {
   const seen = new Set();
@@ -107,20 +107,23 @@ export function explain(q, strings) {
   const part = partOfDay(q.h);
   const phase = PHASES.find((p) => q.h >= p.from && q.h <= p.to);
   const range = formatRange(phase.from, phase.to);
-  const hourWord = numberWords(spokenHour(q.h));
+  const hourWord = hourWords(spokenHour(q.h), strings.speech);
   const hourRule = q.h >= 12
-    ? t.minus(pad(q.h), pad(spokenHour(q.h) % 12 === 0 ? 0 : spokenHour(q.h)), hourWord)
-    : q.h === 0 ? t.midnight : t.same(pad(q.h), hourWord);
+    ? t.minus(q.h, spokenHour(q.h) % 12, hourWord)
+    : q.h === 0 ? t.midnight : t.same(q.h, hourWord);
 
   switch (q.type) {
     case 'pair':
-      return q.h >= 12 ? t.pairDown(pad(q.h), q.answer) : t.pairUp(pad(q.h), q.answer);
+      return q.h >= 12 ? t.pairDown(q.h, q.answer, hourWord) : t.pairUp(q.h, q.answer, hourWord);
     case 'part':
       return t.part(format(q.h, q.m), strings.phases[part], range);
     case 'say':
-      return t.say(hourRule, pad(q.m), minuteWords(q.m), strings.speech.partPhrase[part]);
+      return t.say(hourRule, pad(q.m), minuteWords(q.m), partPhrase(q.h, strings.speech));
     case 'set':
-      return t.set(hourWord, strings.speech.partPhrase[part], q.answer, q.h >= 12 ? t.plus(pad(spokenHour(q.h) % 12), pad(q.h)) : '');
+      // On the dial the time is given in numbers: find where the short hand
+      // goes, then the part of the day for the sun/moon switch.
+      if (q.via === 'dial') return t.setDial(q.h, spokenHour(q.h), strings.phases[part]);
+      return t.set(hourWord, partPhrase(q.h, strings.speech), q.answer, q.h >= 12 ? t.plus(spokenHour(q.h) % 12, q.h) : '');
     default:
       return '';
   }
