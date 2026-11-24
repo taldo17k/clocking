@@ -4,7 +4,7 @@
 // are built from time.js so they always match the rest of the page.
 import { setTime, subscribe } from './state.js';
 import { ensureName, getName } from './name.js';
-import { numberWords, pad, pair, partOfDay, spoken, spokenHour } from './time.js';
+import { minuteWords, numberWords, pad, pair, partOfDay, spoken, spokenHour } from './time.js';
 
 const STORAGE_KEY = 'clocking.lesson';
 const CYCLE_MS = 1800;
@@ -55,7 +55,7 @@ function breakdown(h, m, strings) {
   if (h >= 12) rows.push([pad(h), t.pair(pad(h), pad(pair(h))), hourWord]);
   else if (h === 0) rows.push([pad(h), t.midnight, hourWord]);
   else rows.push([pad(h), null, hourWord]);
-  rows.push([pad(m), null, m === 0 ? strings.speech.oclock : numberWords(m)]);
+  rows.push([pad(m), null, minuteWords(m) || t.noMinutes]);
   const part = partOfDay(h);
   rows.push([strings.phases[part], null, strings.speech.partPhrase[part]]);
   return { rows, sentence: strings.sentence(spoken(h, m)) };
@@ -132,11 +132,11 @@ export function initLessons(strings) {
           const v = document.createElement('span');
           v.className = 'lesson-via';
           v.textContent = via;
-          li.append(' → ', v);
+          li.append(` ${L.breakdown.arrow} `, v);
         }
         const word = document.createElement('strong');
         word.textContent = to;
-        li.append(' → ', word);
+        li.append(` ${L.breakdown.arrow} `, word);
         list.append(li);
       });
       const result = document.createElement('p');

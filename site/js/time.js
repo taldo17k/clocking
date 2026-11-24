@@ -68,29 +68,71 @@ export function handAngles(h, m) {
   };
 }
 
-// --- Saying the time aloud (English) -------------------------------------
 
-/** A number 0–59 in words, e.g. 39 → "thirty-nine". */
-export function numberWords(n, words = en.speech) {
+// --- Saying the time aloud ------------------------------------------------
+// English and Hebrew follow different rules; the language is picked by the
+// `lang` of the speech words. The page calls useSpeech() once at start-up.
+
+let currentSpeech = en.speech;
+/** Choose the language used by default (strings.speech from en.js or he.js). */
+export function useSpeech(words) { currentSpeech = words; }
+
+/**
+ * A range such as "07–11". On the Hebrew page it is wrapped in invisible
+ * left-to-right isolate marks (U+2066 … U+2069), so right-to-left text doesn't
+ * flip it into "11–07" or split it across two lines.
+ */
+export function formatRange(from, to) {
+  if (from === to) return pad(from);
+  if (currentSpeech.lang !== 'he') return `${pad(from)}–${pad(to)}`;
+  // Word joiners (U+2060) also stop the line from breaking inside the range.
+  return `\u2066${pad(from)}\u2060–\u2060${pad(to)}\u2069`;
+}
+
+/** A number 0–59 in words, e.g. 39 → "thirty-nine" / "שלושים ותשע". */
+export function numberWords(n, words = currentSpeech) {
   if (!Number.isInteger(n) || n < 0 || n > 59) throw new RangeError(`number must be an integer 0–59, got ${n}`);
   if (n < 20) return words.ones[n];
   const tens = words.tens[Math.floor(n / 10)];
-  return n % 10 ? `${tens}-${words.ones[n % 10]}` : tens;
+  if (!(n % 10)) return tens;
+  return words.lang === 'he' ? `${tens} ו${words.ones[n % 10]}` : `${tens}-${words.ones[n % 10]}`;
+}
+
+/** How the minutes are said on their own, e.g. 15 → "fifteen" / "חמש עשרה דקות". 0 → "o'clock" / "". */
+export function minuteWords(m, words = currentSpeech) {
+  checkMinute(m);
+  if (words.lang === 'he') {
+    if (m === 0) return '';
+    if (m === 1) return `${words.minute} ${words.ones[1]}`;      // דקה אחת
+    if (m === 2) return `${words.two} ${words.minutes}`;          // שתי דקות
+    return `${numberWords(m, words)} ${words.minutes}`;
+  }
+  return m === 0 ? words.oclock : numberWords(m, words);
 }
 
 /**
- * Natural English: 08:15 → "eight fifteen in the morning",
- * 22:39 → "ten thirty-nine at night", 08:05 → "eight oh five in the morning",
+ * Say a time, naming the hour as `hourNumber` (normally spokenHour(h)).
+ * English: 08:15 → "eight fifteen in the morning", 08:05 → "eight oh five in the morning",
  * 08:00 → "eight o'clock in the morning".
+ * Hebrew (as on the hand-made page): 08:15 → "שמונה וחמש עשרה דקות בבוקר",
+ * 22:39 → "עשר ושלושים ותשע דקות בלילה", 08:00 → "שמונה בבוקר".
  */
-export function spoken(h, m, words = en.speech) {
+export function spokenAs(hourNumber, h, m, words = currentSpeech) {
   checkHour(h); checkMinute(m);
-  const hour = numberWords(spokenHour(h), words);
+  const hour = numberWords(hourNumber, words);
+  const part = words.partPhrase[partOfDay(h)];
+  if (words.lang === 'he') return m === 0 ? `${hour} ${part}` : `${hour} ו${minuteWords(m, words)} ${part}`;
   let minutes;
   if (m === 0) minutes = words.oclock;
   else if (m < 10) minutes = `${words.oh} ${numberWords(m, words)}`;
   else minutes = numberWords(m, words);
-  return `${hour} ${minutes} ${words.partPhrase[partOfDay(h)]}`;
+  return `${hour} ${minutes} ${part}`;
+}
+
+/** The natural way to say a time, e.g. 22:39 → "ten thirty-nine at night" / "עשר ושלושים ותשע דקות בלילה". */
+export function spoken(h, m, words = currentSpeech) {
+  checkHour(h);
+  return spokenAs(spokenHour(h), h, m, words);
 }
 
 /**

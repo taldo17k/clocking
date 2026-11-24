@@ -218,31 +218,38 @@ All the scenes are animated (`js/scene.js`, `css/scene.css`): layered hills, a s
 - *As built:*
   - **Preview card:** `assets/og-image.jpg` (1200×630, 95 KB) is made from the real sky scenes, with Open Graph and Twitter tags and a canonical URL.
   - **Phone speed:** the slow drift of the panel backgrounds repainted every panel on every frame. It now moves the layer instead, which the graphics card handles; main-thread work fell from 2.6 s to 0.26 s per 3 s. Google Fonts no longer block the first paint.
-  - **Lighthouse:** on the live site before the fix, mobile was 61/100/100/100 and desktop 97/100/100/100. Locally after the fix, mobile is 99/100/100/100.
+  - **Lighthouse:** on the live site before the fix, mobile was 61/100/100/100 and desktop 97/100/100/100. Locally after the fix, mobile is 99/100/100/100. On the live site after the fix: mobile 100/100/100/100 (90 on the first cold run) and desktop 97/100/100/100.
   - **Contrast:** the worst case is the highlighted scene label at night, 5.28:1.
   - **Weight:** about 68 KB without fonts, before compression.
   - **Reduce motion:** about 540 animations normally, none with the setting on.
   - **Local preview:** `npm run serve`, which tells the browser to check for new files every time.
 
 **Success criteria**
-- [ ] Sharing the link in WhatsApp or Slack shows a proper preview card.
-- [ ] Lighthouse scores: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO ≥ 95.
+- [x] Sharing the link in WhatsApp or Slack shows a proper preview card.
+- [x] Lighthouse scores: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO ≥ 95.
 - [x] Total page weight is under 300 KB (excluding fonts).
 - [x] Animations are reduced when the OS "reduce motion" setting is on.
 
 ---
 
-## Step 9 (future): Hebrew version
+## Step 9: Hebrew version
 
 **Tasks**
-- Add `strings/he.js` with the original wording (לילה, בוקר, צהריים, אחר הצהריים, ערב, and the example sentences), and a language toggle (EN / עב).
+- Add `strings/he.js` with the original wording (לילה, בוקר, צהריים, אחר הצהריים, ערב, and the example sentences).
+- Serve Hebrew at its own address, `/clocking/he/`, instead of a language toggle in the page.
 - Switch to `dir="rtl"`. The `HH:MM` display stays left-to-right.
 - Add Hebrew spoken-time logic, which differs from English, for example "שמונה וחמש עשרה דקות".
 
 **Success criteria**
-- [ ] Switching language changes all text with no reload, and the choice is remembered.
-- [ ] The RTL layout has no overlapping or misaligned elements, and the clock digits stay left-to-right.
-- [ ] The Hebrew lesson text matches the original page word for word for both examples.
+- [x] `/clocking/he/` opens in Hebrew and right-to-left before any script runs; `/clocking/` stays English. Sharing either link shows a preview in its own language.
+- [x] The RTL layout has no overlapping or misaligned elements, and the clock digits stay left-to-right.
+- [x] The Hebrew lesson text matches the original page word for word for both examples.
+
+- *As built:*
+  - **The Hebrew page:** `site/he/index.html` is generated from `site/index.html` by `npm run build:he` (`scripts/build-he.mjs`). It shares the CSS, JavaScript and images through `<base href="../">`, starts with the Hebrew text already filled in, and has its own preview card (`assets/og-image-he.jpg`). A unit test fails, and so does the deploy, if it is out of date.
+  - **Speaking times:** `time.js` speaks both languages (`useSpeech`). Hebrew uses feminine numbers and the page's wording: "השעה שמונה וחמש עשרה דקות בבוקר", "השעה עשר ושלושים ותשע דקות בלילה", "שמונה ודקה אחת", "שמונה ושתי דקות", "שמונה בבוקר".
+  - **Layout:** midday is 12–14 in both languages. The digital clock and the hour pairs board keep the drawing's left-to-right layout, and sums and ranges are kept left-to-right inside Hebrew text. Hebrew uses the Rubik font for body text, has no AM/PM hint, and addresses learners in the plural ("לחצו").
+  - **Checks:** a full Hebrew quiz round, the lesson and phone layouts are checked in the browser. Lighthouse for `/he/` (local, mobile): 98/100/100/100.
 
 ---
 

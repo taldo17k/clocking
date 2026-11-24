@@ -2,7 +2,7 @@
 // Pure functions, no DOM, so they are unit-tested in tests/quiz.test.js.
 // Every answer is computed with time.js, the same rules the rest of the page uses.
 import { PHASES } from './phases.js';
-import { addMinutes, format, numberWords, pad, pair, partOfDay, spoken, spokenHour } from './time.js';
+import { addMinutes, format, formatRange, minuteWords, numberWords, pad, pair, partOfDay, spoken, spokenAs, spokenHour } from './time.js';
 
 export const ROUND_SIZE = 10;
 export const SET_TOLERANCE_MIN = 2;
@@ -51,13 +51,12 @@ const MAKERS = {
     const h = randInt(24, rand);
     const m = fiveMinutes(rand);
     const answer = spoken(h, m);
-    const words = answer.split(' ');
     const candidates = [
       spoken(pair(h), m),                         // right words, wrong half of the day
       spoken(h, (m + 10) % 60),                   // wrong minutes
       spoken((h + 1) % 24, m),                    // hour off by one
     ];
-    if (h >= 13) candidates.unshift([numberWords(h), ...words.slice(1)].join(' ')); // "fifteen forty-five…"
+    if (h >= 13) candidates.unshift(spokenAs(h, h, m)); // saying the 24-hour number: "fifteen forty-five…"
     const options = withDistractors(answer, candidates, rand);
     return { type: 'say', key: `say:${h}:${m}`, h, m, options, answer };
   },
@@ -107,7 +106,7 @@ export function explain(q, strings) {
   const t = strings.quiz.explain;
   const part = partOfDay(q.h);
   const phase = PHASES.find((p) => q.h >= p.from && q.h <= p.to);
-  const range = phase.from === phase.to ? pad(phase.from) : `${pad(phase.from)}–${pad(phase.to)}`;
+  const range = formatRange(phase.from, phase.to);
   const hourWord = numberWords(spokenHour(q.h));
   const hourRule = q.h >= 12
     ? t.minus(pad(q.h), pad(spokenHour(q.h) % 12 === 0 ? 0 : spokenHour(q.h)), hourWord)
@@ -119,7 +118,7 @@ export function explain(q, strings) {
     case 'part':
       return t.part(format(q.h, q.m), strings.phases[part], range);
     case 'say':
-      return t.say(hourRule, pad(q.m), q.m === 0 ? strings.speech.oclock : numberWords(q.m), strings.speech.partPhrase[part]);
+      return t.say(hourRule, pad(q.m), minuteWords(q.m), strings.speech.partPhrase[part]);
     case 'set':
       return t.set(hourWord, strings.speech.partPhrase[part], q.answer, q.h >= 12 ? t.plus(pad(spokenHour(q.h) % 12), pad(q.h)) : '');
     default:

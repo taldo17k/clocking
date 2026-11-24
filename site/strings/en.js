@@ -26,7 +26,7 @@ export default {
       practice: (name) => `Keep practising, ${name}. The lesson can help too.`,
     },
   },
-  heroTitle: 'How to read the 24-hour clock',
+  heroTitle: 'The 24-hour clock',
   heroLead: "A day has 24 hours. Let's learn to read every one of them.",
   hoursLabel: 'hours (00–23)',
   minutesLabel: 'minutes (00–59)',
@@ -37,6 +37,7 @@ export default {
     minutes: (mm) => `${mm} minutes`,
   },
   sentence: (words) => `It's ${words}.`,
+  showAmPm: true,   // the "8:15 AM" hint under the sentence
   nowButton: 'Now',
   playButton: 'Play the day',
   stopButton: 'Stop',
@@ -144,6 +145,8 @@ export default {
     breakdown: {
       pair: (hh, partner) => `${hh} − 12 = ${partner}`,
       midnight: '00 is said like 12',
+      noMinutes: "o'clock",
+      arrow: '→',
     },
   },
   phases: {
@@ -158,6 +161,7 @@ export default {
 
   // Words used to say a time aloud (see js/time.js).
   speech: {
+    lang: 'en',
     ones: ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
       'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen',
       'eighteen', 'nineteen'],

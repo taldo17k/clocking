@@ -5,7 +5,7 @@
 // dashed circle, and the scene for the current hour lights up.
 import { getTime, setTime, subscribe } from './state.js';
 import { PHASES } from './phases.js';
-import { pad, pair, partOfDay } from './time.js';
+import { formatRange, pad, pair, partOfDay } from './time.js';
 import { createScene } from './scene.js';
 
 const HEADER_ROWS = 1;
@@ -49,7 +49,7 @@ export function initPairs(board, strings) {
     btn.type = 'button';
     btn.className = `pairs-scene pairs-scene-${side}`;
     btn.dataset.phase = phase.id;
-    const range = phase.from === phase.to ? pad(phase.from) : `${pad(phase.from)}–${pad(phase.to)}`;
+    const range = formatRange(phase.from, phase.to);
     btn.setAttribute('aria-label', `${strings.phases[phase.id]}, ${range}`);
     btn.append(createScene(phase.id));
     const label = document.createElement('span');

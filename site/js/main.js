@@ -1,5 +1,5 @@
-import strings from '../strings/en.js';
-import { amPm, format, pad, partOfDay, spoken } from './time.js';
+import en from '../strings/en.js';
+import { amPm, format, pad, partOfDay, spoken, useSpeech } from './time.js';
 import { setTime, shiftTime, subscribe } from './state.js';
 import { initDigital } from './clock.js';
 import { initStageScene } from './scene.js';
@@ -11,6 +11,11 @@ import { initAnalytics } from './analytics.js';
 import { initName } from './name.js';
 
 const $ = (id) => document.getElementById(id);
+
+// The language comes from the page itself: /clocking/ is English, /clocking/he/
+// is Hebrew (<html lang="he">). Hebrew text is only downloaded on the Hebrew page.
+const strings = document.documentElement.lang === 'he' ? (await import('../strings/he.js')).default : en;
+useSpeech(strings.speech);
 
 function applyStrings() {
   document.documentElement.lang = strings.lang;
@@ -37,6 +42,7 @@ function initSentence() {
     const { hour, period } = amPm(h);
     $('say-text').textContent = sentence;
     $('ampm').textContent = `${hour}:${pad(m)} ${period}`;
+    $('ampm').hidden = !strings.showAmPm;
     // Announce once the time stops changing, and not during "Play the day".
     clearTimeout(liveTimer);
     if (source === 'init' || source === 'play') return;

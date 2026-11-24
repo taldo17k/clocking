@@ -86,3 +86,9 @@ Example 2 shows the method in full. To read **22**, find its pair (**10**), say 
 
 - The original does **not** use AM/PM. It uses part-of-day words instead. The English site will keep that approach as the main method, and will show AM/PM as a secondary hint, since English speakers will expect it.
 - Natural English phrasing: "It's eight fifteen in the morning" and "It's ten thirty-nine at night". The more literal "eight and fifteen minutes" can be shown as a step toward it. (A "quarter past / ten to" style was tried and rejected: simply saying the minutes is clearer.)
+
+## Notes for the Hebrew version (`/clocking/he/`)
+
+- The sentences follow the page: "השעה שמונה וחמש עשרה דקות בבוקר" and "השעה עשר ושלושים ותשע דקות בלילה". Whole hours are said without minutes ("השעה שמונה בבוקר"), one minute is "ודקה אחת" and two minutes are "ושתי דקות". Hours and minutes use feminine numbers.
+- Parts of the day: לילה, זריחה (06), בוקר, צהריים (12–14, the same split as English), אחר הצהריים, שקיעה (18), ערב. In sentences: בלילה, בבוקר, בצהריים, אחר הצהריים, בערב.
+- There is no AM/PM hint. The digital clock and the hour pairs board keep the drawing's left-to-right layout.

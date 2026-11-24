@@ -2,7 +2,7 @@
 
 A friendly, interactive website that teaches how to read the 24-hour clock.
 
-**Live site: https://taldo17k.github.io/clocking/**
+**Live site: https://taldo17k.github.io/clocking/** · **בעברית: https://taldo17k.github.io/clocking/he/**
 
 ![Clocking: the hour pairs board with a sky picture for every part of the day](docs/screenshot.png)
 
@@ -20,8 +20,9 @@ A friendly, interactive website that teaches how to read the 24-hour clock.
 You need [Node.js](https://nodejs.org/) 20 or newer. There is nothing to install.
 
 ```sh
-npm run serve   # preview at http://localhost:8000
-npm test        # unit tests for the clock and quiz logic
+npm run serve     # preview at http://localhost:8000 (Hebrew: /he/)
+npm test          # unit tests for the clock, quiz and Hebrew page
+npm run build:he  # rebuild site/he/index.html after editing site/index.html or site/strings/he.js
 ```
 
 Use `npm run serve` rather than `python3 -m http.server`. The Python server doesn't tell browsers to check for new files, so after an edit a browser can mix old and new JavaScript and break the page.
@@ -34,7 +35,8 @@ Plain HTML, CSS and JavaScript modules with no build step. The `site/` folder is
 |---|---|
 | `site/js/time.js` | The clock rules (pairs, parts of the day, how a time is said), used everywhere |
 | `site/js/quiz-core.js` | Quiz questions, answer checking and explanations |
-| `site/strings/en.js` | All the text on the site, ready for translation |
+| `site/strings/en.js`, `site/strings/he.js` | All the text on the site, in English and Hebrew |
+| `site/he/index.html` | The Hebrew page, generated from `site/index.html` by `scripts/build-he.mjs` |
 | `site/js/scene.js`, `site/css/scene.css` | The animated sky scenes |
 | `tests/` | Unit tests (`node --test`) |
 | `documents/CONTENT.md` | The original drawing transcribed and translated, plus the content decisions |

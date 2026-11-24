@@ -5,6 +5,7 @@
   "description": "Interactive site for learning the 24-hour clock. No build step; package.json runs the tests and a local preview server.",
   "scripts": {
     "test": "node --test tests/*.test.js",
-    "serve": "node scripts/serve.mjs"
+    "serve": "node scripts/serve.mjs",
+    "build:he": "node scripts/build-he.mjs"
   }
 }
