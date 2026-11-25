@@ -58,6 +58,7 @@ export default {
   stageHint: '用箭头、上下滑动或键盘来改变小时和分钟。',
   footerCredit: '根据一张手绘的课程页面制作。',
   footerPrivacy: '匿名统计访问量，不使用 Cookie。',
+  footerSocial: '关注作者',
   quizOpen: '练习',
   quiz: {
     open: '练习',

@@ -53,6 +53,7 @@ export default {
   stageHint: 'Change the hours and minutes with the arrows, by swiping up and down, or with the keyboard.',
   footerCredit: 'Based on a hand-drawn lesson.',
   footerPrivacy: 'Anonymous, cookie-free visit counting.',
+  footerSocial: 'Follow the author',
   quizOpen: 'Practice',
   quiz: {
     open: 'Practice',

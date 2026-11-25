@@ -63,6 +63,7 @@ export default {
   stageHint: 'שנו את השעות והדקות עם החצים, בהחלקה למעלה ולמטה, או עם המקלדת.',
   footerCredit: 'מבוסס על דף לימוד שצויר ביד.',
   footerPrivacy: 'ספירת ביקורים אנונימית, בלי עוגיות.',
+  footerSocial: 'רשתות חברתיות',
   quizOpen: 'חידון',
   quiz: {
     open: 'חידון',

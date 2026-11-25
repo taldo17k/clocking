@@ -1106,6 +1106,22 @@ body.lesson-open main { padding-bottom: min(60vh, 460px); }
 .stage, .dial-wrap { scroll-margin-top: var(--sp-3); }
 
 .footer-privacy { margin-top: var(--sp-1, 0.25rem); font-size: 0.85em; opacity: 0.8; }
+.footer-social { display: flex; gap: var(--sp-2); margin-top: var(--sp-3); }
+.footer-social a {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--card);
+  box-shadow: 2px 2px 0 var(--line);
+  transition: transform var(--t-fast), background var(--t-fast);
+}
+.footer-social a:hover { transform: translate(-1px, -1px); background: var(--paper-2); }
+.footer-social a:focus-visible { outline: 3px solid #ffd23f; outline-offset: 2px; }
+.footer-social svg { width: 18px; height: 18px; fill: currentColor; }
 
 /* Anything marked hidden stays hidden, even when a class sets display (e.g. .lesson-nav). */
 [hidden] { display: none !important; }
